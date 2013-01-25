@@ -1,0 +1,25 @@
+.container,
+.navbar-static-top .container,
+.navbar-fixed-top .container,
+.navbar-fixed-bottom .container {
+  width: 1170px;
+}
+
+.span9 {
+  width: 870px;
+}
+
+.span3 {
+  width: 270px;
+}
+
+.navbar .brand {
+    color: #555555;
+    display: block;
+    float: left;
+    font-size: 23px;
+    font-weight: bold;
+    margin-left: -20px;
+    padding: 10px 20px;
+    text-shadow: 0 1px 0 white;
+}
