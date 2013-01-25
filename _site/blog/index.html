@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <title>光子开源之旅</title>
+    <meta content='width=device-width, initial-scale=1.0' name='viewport' />
+    <style type='text/css'>
+      /*<![CDATA[*/
+        body {
+          padding-top: 60px;background: url("/images/white_texture.png") repeat scroll 0 0 transparent;
+        }
+      /*]]>*/
+    </style>
+    <link href='/stylesheets/styles.css' rel='stylesheet' type='text/css' />
+    <link href='/stylesheets/kuuyee.css' rel='stylesheet' type='text/css' />
+    <!--[if lt IE 9]>
+      <script src='//html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class='navbar navbar-fixed-top'>
+      <div class='navbar-inner'>
+        <div class='container'>
+          <a class='brand' href='/'>光子开源之旅</a>
+          <ul class='nav'>
+            <li>
+              <a href='/'>Home</a>
+            </li>
+            <li>
+              <a href='/hibernate/'>博客</a>
+            </li>
+            <li>
+              <a href='/ui/'>关于我</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class='container'>
+      <!-- / general layout copied from the layout blog -->
+<!-- / find the tag name based on the page output path and the tag url -->
+<div class='row'>
+  <div class='span9'>
+    <h1>
+      In relation to
+      blog
+    </h1>
+    <div class='blogpost'>
+      <h2>
+        <a href='/2012/06/14/migrating-a-wordpress-blog-to-awestruct/'>Migrating a Wordpress blog to Awestruct</a>
+      </h2>
+      <div class='blogtagbar'>
+        <a href='/steve-ebersole/'>
+          Steve Ebersole
+        </a>
+        &nbsp;
+        |&nbsp;
+        2012-06-14
+        &nbsp;|&nbsp;
+        <a class='label' href='/website/'>
+          website
+        </a>
+        &nbsp;
+        <a class='label' href='/awestruct/'>
+          awestruct
+        </a>
+        &nbsp;
+        <a class='label' href='/blog/'>
+          blog
+        </a>
+        &nbsp;
+      </div>
+      <p>
+        <p>As I said <a href="/blog/2012/04/10/the-perfect-storm-creates-new-website-and-blog/">earlier</a>, I moved my blog from a Wordpress instance to
+<a href="http://awestruct.org">Awestruct</a>, a framework for creating static HTML sites and blogs.</p>
+
+<p>The process is roughly made of these steps:</p>
+
+<ol>
+<li>Move comments to Disqus or another hosted service</li>
+<li>Initialize Awestruct's structure</li>
+<li>Import the blog posts from Wordpress to Awestruct</li>
+<li>Add the necessary Awestruct extensions</li>
+<li>Write the correct redirect rules</li>
+</ol>
+
+
+<h2>Moving comments to a hosted service</h2>
+
+<p>Because Awestruct is a static HTML generator, you need to use a hosted service
+like <a href="http://intensedebate.com/">IntenseDebate</a> or <a href="http://disqus.com/">Disqus</a>. I personally use Disqus.
+The import process is easy and involve installing a Disqus plugin in your Wordpress
+instance.</p>
+
+<h2>Initialize Awestruct's structure</h2>
+
+<p>Awestruct has a decent <a href="http://awestruct.org/getting_started/">getting started</a> section but I find the easiest
+approach is to fork an existing Awestruct example and change what you want. You can take
+<a href="https://github.com/emmanuelbernard/emmanuelbernard.com/">my website source</a> as an example if you want.</p>
+
+<h2>Import blog posts</h2>
+
+<p>I wanted to keep my old content and get rid of the Wordpress instance. In Wordpress,
+export your blog content (<code>Tools-&gt;Export</code>, all content). The XML file will be used
+to create the various blog entries in Awestruct.</p>
+
+<p>The import script is available <a href="https://github.com/emmanuelbernard/emmanuelbernard.com/blob/master/_bin/import">here</a> and takes the Wordpress xml file
+and the output directory. In my case my blog is at <a href="http://emmanuelbernard.com/blog/">http://emmanuelbernard.com/blog/</a></p>
+
+<pre><code>./_bin/import ~/Downloads/wordpress-export.xml ./blog&#x000A;</code></pre>
+
+<p>Edit it to reference your previous blog URL. With that the script
+will make sure local images, PDF etc are properly imported as well instead of
+simply referenced.</p>
+
+<p>For each blog entry, a <code>.erb</code> file is created.</p>
+
+<blockquote><p>Note that the import process might fail. Don't worry, simply read the error message and
+try and fix the xml file and run the import process again. In my case, I needed to add
+an empty line right before <code>&lt;/pre&gt;</code> or <code>&lt;/blockquote&gt;</code> elements. After a few stop and go
+you will have your data fully imported.</p></blockquote>
+
+<h2>Add the necessary Awestruct extensions</h2>
+
+<p>Blogs in Awestruct are build by a few extensions:</p>
+
+<ul>
+<li><code>Posts</code>: creates the blog structure and pages based on the content of a directory</li>
+<li><code>Paginator</code> (optional): paginate the blog entries</li>
+<li><code>Tagger</code> (optional): generate the tag structure and pages</li>
+<li><code>TagCloud</code> (optional): generate a tag cloud</li>
+<li><code>Atomizer</code>: generate the atom feed</li>
+<li><code>Disqus</code>: add the Disqus integration to your site</li>
+</ul>
+
+
+<p>Check out <a href="https://github.com/emmanuelbernard/emmanuelbernard.com/">my website source</a> for an example. Note that at the time of writing,
+I use some custom versions of these extensions but these changes are being pushed to Awestruct.</p>
+
+<h2>Write the correct redirect rules</h2>
+
+<p>If your URL structure has changed either because of a relative URL change, because you move
+to a new (sub)domain or both, you will need to write 301 redirect rules:</p>
+
+<ul>
+<li>old links spread on the internet will still work</li>
+<li>people registered to your old feed will not get lost</li>
+<li>Google will understand you moved your blog, reindex it and remove the old references</li>
+<li>Disqus will move your comments from the old blog to the new blog</li>
+</ul>
+
+
+<p>In my .htaccess file, you can see 5 main redirections:</p>
+
+<ul>
+<li>redirect / from the old domain to the new domain</li>
+<li>redirect the old feed to the new feed</li>
+<li>redirect old posts to new posts (with a regexp or manual)</li>
+<li>redirect category urls to the new tag urls</li>
+<li>redirect anything else to the new blog</li>
+</ul>
+
+
+<p>Let's look at the file</p>
+
+<pre><code>RewriteEngine on&#x000A;RewriteCond %{HTTP_HOST} ^blog.emmanuelbernard.com$&#x000A;&#x000A;# Old feed redirected&#x000A;RewriteRule feed/ http://emmanuelbernard.com/blog/feed.atom [R=301,L]&#x000A;&#x000A;# Redirect 2012/04/07/something to http://emmanuelbernard.com/blog/2012/04/07/something&#x000A;RewriteRule ([0-2][0-9][0-9][0-9])/([0-1][0-9])/([0-3][0-9])/([^/]+)/ http://emmanuelbernard.com/blog/$1/$2/$3/$4/ [R=301,L]&#x000A;&#x000A;# Redirect category/slug to http://emmanuelbernard.com/tags/slug&#x000A;RewriteRule category/([^/]+)/ http://emmanuelbernard.com/blog/tags/$1/ [R=301,L]&#x000A;&#x000A;# Top level url redurect&#x000A;RewriteRule ^/?$ http://emmanuelbernard.com/blog/ [R=301,L]&#x000A;&#x000A;# Manual redirect form old URL scheme yyyy/mm to new blog&#x000A;RewriteRule 2007/01/activerecord-pattern-so-what[/]? http://emmanuelbernard.com/blog/2007/01/07/activerecord-pattern-so-what/ [R=301,L]&#x000A;# ...&#x000A;&#x000A;# Redirect anything else to new blog&#x000A;RewriteRule ^(.*)$ http://emmanuelbernard.com/blog/&#x000A;</code></pre>
+
+<p>Because my old url scheme was <code>yyyy/mm/slug</code> and the new one is <code>yyyy/mm/dd/slug</code>,
+I could not write a regexp based redirect rules. But I used a small Ruby script
+to convert the old URLs to the new URLs based on the content of my Awestruct blog
+directory. Check out the <a href="https://github.com/emmanuelbernard/emmanuelbernard.com/blob/master/_bin/htaccess-generator.rb">script here</a>.</p>
+
+<pre><code>#!/usr/bin/env ruby&#x000A;#&#x000A;# Generate a htaccess rule for each old blog entry from&#x000A;# http://blog.emmanuelbernard.com/yyyy/mm/slug to http://emmanuelbernard.com/blog/yyyy/mm/dd/slug&#x000A;# Has to be manual as the day is unknown in the URL&#x000A;#&#x000A;Dir.foreach("../blog") { |file| &#x000A;    if (file =~ /(20[0-1][0-9])-([0-1][0-9])-([0-3][0-9])-([^\/]+).html.erb/)&#x000A;        result = "RewriteRule " &lt;&lt; $1 &lt;&lt; "/" &lt;&lt; $2 &lt;&lt; "/" &lt;&lt; $4 &lt;&lt; "[/]?"&#x000A;        result = result &lt;&lt; " http://emmanuelbernard.com/blog/"&#x000A;        result = result &lt;&lt; $1 &lt;&lt; "/" &lt;&lt; $2 &lt;&lt; "/" &lt;&lt; $3 &lt;&lt; "/" &lt;&lt; $4 &lt;&lt; "/ [R=301,L]"&#x000A;        puts result&#x000A;    end&#x000A;}&#x000A;</code></pre>
+
+<h2>Publish</h2>
+
+<p>Publish your Awestruct website on your server and test :)</p>
+
+<p>The final step is to ask Disqus to listen to the 301 redirects to attach the old comments to the new
+Blog entries. It's in <code>Admin -&gt; Migrate tools -&gt; Redirect Crawler</code>.</p>
+
+<p>And voilà! You have a fully upgraded blog :)</p>
+      </p>
+      <hr />
+    </div>
+    <div class="pagination-links"><span class="current-page">1</span> </div>
+  </div>
+  <div class='span3'>
+    <a href='/blog/feed.atom'>
+      <img src='/images/services/rss_32.png' />
+    </a>
+    <a href='/blog/feed.atom'>
+      Feed for
+      blog
+    </a>
+    <h2>
+      Authors
+    </h2>
+    <ul class='author'>
+      <li>
+        <span>
+          <a href='/emmanuel-bernard/'>Emmanuel Bernard</a>
+        </span>
+      </li>
+      <li>
+        <span>
+          <a href='/jay-balunas/'>Jay Balunas</a>
+        </span>
+      </li>
+      <li>
+        <span>
+          <a href='/norman-richards/'>Norman Richards</a>
+        </span>
+      </li>
+      <li>
+        <span>
+          <a href='/steve-ebersole/'>Steve Ebersole</a>
+        </span>
+      </li>
+      <li>
+        <span>
+          <a href='/kuuyee/'>kuuyee</a>
+        </span>
+      </li>
+    </ul>
+    <h2>
+      Tags
+    </h2>
+    <div class='tags-cloud'>
+        <span class='tags tags-0'>
+          <a href='/aerogear/'>AeroGear</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/contexts-and-dependency-injection/'>Contexts and Dependency Injection</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/dsee/'>DSEE</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/laissez-faire/'>Laissez faire</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/mobile/'>Mobile</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/news/'>News</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/oam/'>OAM</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/oim/'>OIM</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/webgate/'>WebGate</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/weblogic/'>Weblogic</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/awestruct/'>awestruct</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/blog/'>blog</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/tool/'>tool</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/website/'>website</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/'>服务器</a>
+        </span>
+        <span class='tags tags-0'>
+          <a href='/'>配置</a>
+        </span>
+      </div>
+  </div>
+</div>
+      <hr />
+      <footer>
+        <p>&copy; 光子开源之旅 2012-2013</p>
+      </footer>
+    </div>
+  </body>
+</html>
