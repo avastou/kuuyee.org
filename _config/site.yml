@@ -1,5 +1,9 @@
-title: In Relation To
-author: Hibernate Team
+title: 光子CI之旅
+author: kuuyee
+encoding: UTF-8
+
+asciidoc:
+  engine: asciidoctor
 
 profiles:
   development:
@@ -7,7 +11,10 @@ profiles:
 #    disqus_developer: true
     dev: true
   production:
-    base_url: http://in.relation.to/
+    base_url: http://kuuyee.github.io/
+    deploy:
+      host: github_pages
+      branch: master
 
 #google_analytics: UA-3479508-6
 #flattr_username: epbernard
