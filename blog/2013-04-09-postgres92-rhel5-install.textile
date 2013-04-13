@@ -1,0 +1,23 @@
+---
+layout: blog-post 
+title: 在RHEL5.5上安装PostgreSql92
+author: kuuyee 
+tags: [PostgreSQL, RHEL, Linux]
+---
+
+RHEL5.5默认的源里没有postgresql9的包，需要下载源。下载地址 ：["http://yum.postgresql.org/9.2/redhat/rhel-5-x86_64/pgdg-redhat92-9.2-7.noarch.rpm":http://yum.postgresql.org/9.2/redhat/rhel-5-x86_64/pgdg-redhat92-9.2-7.noarch.rpm]
+
+然后安装源
+
+bc(command). rpm -ivh pgdg-redhat92-9.2-7.noarch.rpm 
+ 
+最后安装postgresql92
+
+bc(command). yum install postgresql92 postgresql92-server postgresql92-devel 
+
+
+
+
+
+
+
