@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>光子CI之旅</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="/stylesheets/bootstrap.css" rel="stylesheet">
+    <link href="/stylesheets/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/stylesheets/docs.css" rel="stylesheet">
+    <link href="/stylesheets/prettify.css" rel="stylesheet">
+    <link href="/stylesheets/kuuyee.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+      <script src="/javascripts/html5shiv.js" type="text/javascript"></script>
+    <![endif]-->
+  </head>
+  <body data-spy="scroll" data-target=".bs-docs-sidebar">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <div class="github-banner hidden-phone">
+            <a href="https://github.com/kuuyee/kuuyee.org">
+              <img alt="Fork me on GitHub" src="/images/forkme_right_white_ffffff.png" style="position:absolute;top:0;right:0;border:0;">
+            </a>
+          </div>
+          <a class="btn btn-navbar" data-target=".nav-collapse" data-toggle="collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/index.html">
+            <img alt="#{site.title}" class="kuuyee-logo" src="/images/kuuyee_logo.png">
+            光子CI之旅
+          </a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li>
+                <a href="/index.html">Home</a>
+              </li>
+              <li>
+                <a href="/docs/index.html">文档</a>
+              </li>
+              <li>
+                <a href="/about.html">关于</a>
+              </li>
+            </ul>
+            <form class="navbar-form pull-right">
+              <input class="span2" placeholder="Email" type="text">
+              <button class="btn" type="submit">Sign in</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row" style="height:30px"></div>
+      <!-- / general layout copied from the layout blog -->
+      <!-- / find the tag name based on the page output path and the tag url -->
+      <div class="row">
+        <div class="span9">
+          <h1>
+            标签:
+            Awestruct
+          </h1>
+          <div class="blogpost">
+            <h2>
+              <a href="/2013/02/01/fedora-18-awestruct-install-readme/">下一代静态网站生成框架Awestruct在Fedora18安装全过程</a>
+            </h2>
+            <div class="blogtagbar">
+              <a href="/kuuyee/">
+                kuuyee
+              </a>
+              &nbsp;
+              |&nbsp;
+              2013-02-01
+              &nbsp;|&nbsp;
+              <a class="label" href="/ruby/">
+                Ruby
+              </a>
+              &nbsp;
+              <a class="label" href="/gem/">
+                Gem
+              </a>
+              &nbsp;
+              <a class="label" href="/git/">
+                Git
+              </a>
+              &nbsp;
+              <a class="label" href="/awestruct/">
+                Awestruct
+              </a>
+              &nbsp;
+              <a class="label" href="/linux/">
+                Linux
+              </a>
+              &nbsp;
+              <a class="label" href="/bootstrap/">
+                BootStrap
+              </a>
+              &nbsp;
+            </div>
+            <p>
+              <p><strong>Awestruct是非常棒的静态网站生成框架，他基于Jekyll，使用Ruby语言开发。Awestruct可以根据模板生成非常漂亮的网站，例如可以用BootStrap或者BluePrint，这两个大名鼎鼎的东东不用多说了吧，地球人都知道。废话不多说，进入主题。</strong></p>
+              <h3>安装Ruby环境</h3>
+              <p>首先安装一些依赖库，否则安装Awestruct会报如下的错误：</p>
+              <pre class="command"><code class="command">Building native extensions.  This could take a while...&#x000A;.........&#x000A;ERROR:  Error installing awestruct:&#x000A;        ERROR: Failed to build gem native extension.&#x000A;.&#x000A;        /usr/bin/ruby extconf.rb&#x000A;checking for stdio.h... *** extconf.rb failed ***&#x000A;Could not create Makefile due to some reason, probably lack of&#x000A;necessary libraries and/or headers.  Check the mkmf.log file for more&#x000A;details.  You may need configuration options.&#x000A;.&#x000A;Provided configuration options:&#x000A;        --with-opt-dir&#x000A;        --without-opt-dir&#x000A;        --with-opt-include&#x000A;        --without-opt-include=${opt-dir}/include&#x000A;        --with-opt-lib&#x000A;        --without-opt-lib=${opt-dir}/lib&#x000A;        --with-make-prog&#x000A;        --without-make-prog&#x000A;        --srcdir=.&#x000A;        --curdir&#x000A;        --ruby=/usr/bin/ruby&#x000A;/usr/share/ruby/mkmf.rb:381:in `try_do': The compiler failed to generate an executable file. (RuntimeError)&#x000A;You have to install development tools first.&#x000A;        from /usr/share/ruby/mkmf.rb:506:in `try_cpp'&#x000A;        from /usr/share/ruby/mkmf.rb:931:in `block in have_header'&#x000A;        from /usr/share/ruby/mkmf.rb:790:in `block in checking_for'&#x000A;        from /usr/share/ruby/mkmf.rb:284:in `block (2 levels) in postpone'&#x000A;        from /usr/share/ruby/mkmf.rb:254:in `open'&#x000A;        from /usr/share/ruby/mkmf.rb:284:in `block in postpone'&#x000A;        from /usr/share/ruby/mkmf.rb:254:in `open'&#x000A;        from /usr/share/ruby/mkmf.rb:280:in `postpone'&#x000A;        from /usr/share/ruby/mkmf.rb:789:in `checking_for'&#x000A;        from /usr/share/ruby/mkmf.rb:930:in `have_header'&#x000A;        from extconf.rb:2:in `&lt;main&gt;'</code></pre>
+              <p>开始安装依赖库，用 <strong>root</strong> 用户或者 <strong>su</strong> 执行如下命令：</p>
+              <pre class="command"><code class="command">yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel</code></pre>
+              <div class="alert alert-success">我是Fedora的粉丝，对不住用其它发行版的童鞋了，请自行根据我列出的安装包找到对应的系统安装方法。</div>
+              <p>安装Ruby和RubyGems,用 <strong>root</strong> 用户或者 <strong>su</strong> 执行如下命令：</p>
+              <pre class="command"><code class="command">yum install ruby ruby-devel ruby-irb rubygems</code></pre>
+              <p>Fedora18 Yum源的Ruby非常新，都是目前(2012-12-14)的最新版本，看看安装的Ruby版本：</p>
+              <pre class="command"><code class="command">  正在安装    : libyaml-0.1.4-3.fc18.x86_64                                                                          1/10 &#x000A;  正在安装    : ruby-libs-1.9.3.327-22.fc18.x86_64                                                                   2/10 &#x000A;  正在安装    : ruby-irb-1.9.3.327-22.fc18.noarch                                                                    3/10 &#x000A;  正在安装    : rubygem-json-1.6.5-2.fc18.x86_64                                                                     4/10 &#x000A;  正在安装    : rubygem-io-console-0.3-22.fc18.x86_64                                                                5/10 &#x000A;  正在安装    : rubygem-bigdecimal-1.1.0-22.fc18.x86_64                                                              6/10 &#x000A;  正在安装    : rubygem-rdoc-3.12-5.fc18.noarch                                                                      7/10 &#x000A;  正在安装    : rubygems-1.8.24-3.fc18.noarch                                                                        8/10 &#x000A;  正在安装    : ruby-1.9.3.327-22.fc18.x86_64                                                                        9/10 &#x000A;  正在安装    : ruby-devel-1.9.3.327-22.fc18.x86_64 </code></pre>
+              <h3>安装Awestruct</h3>
+              <p>Awestruct使用RubyGems管理安装，用 <strong>root</strong> 用户或者 <strong>su</strong> 执行如下命令：</p>
+              <pre class="command"><code class="command">gem install awestruct --no-ri --no-rdoc</code></pre>
+              <p>结果报如下错误:</p>
+              <pre class="command"><code class="command">Fetching: nokogiri-1.5.5.gem (100%)&#x000A;ERROR:  Error installing awestruct:&#x000A;        invalid gem format for /usr/local/share/gems/cache/nokogiri-1.5.5.gem</code></pre>
+              <p>这个问题让我郁闷了N久时间，Google了大半天，还特意搞了翻墙，结果死活装不上nokogiri。最后通过Yum来解决,我只能说RubyGems安装很无耻！还是YUM好！，命令如下：</p>
+              <pre class="command"><code class="command">yum install -y rubygem-nokogiri</code></pre>
+              <p>再次安装Awestruct：</p>
+              <pre class="command"><code class="command">yum install -y rubygem-nokogiri</code></pre>
+              <p>盼望已久的时刻来临，如果哪位童鞋看到如下的输出，Congratulations！</p>
+              <pre class="command"><code class="command">Successfully installed awestruct-0.4.7&#x000A;17 gems installed</code></pre>
+              <p>不过别高兴太早，先适用下是否OK！用BootStrap模板生产一个新的静态网站，命令如下：</p>
+              <pre class="command"><code class="command">awestruct -i -f bootstrap //或者用awestruct --init --framework bootstrap</code></pre>
+              <p>傻眼了，还是报错：</p>
+              <pre class="command"><code class="command">[root@localhost kuuyee]# awestruct -i -f bootstrap&#x000A;/usr/local/share/gems/gems/execjs-1.4.0/lib/execjs/runtimes.rb:51:in `autodetect': Could not find a JavaScript runtime. See https://github.com/sstephenson/execjs for a list of available runtimes. (ExecJS::RuntimeUnavailable)&#x000A;        from /usr/local/share/gems/gems/execjs-1.4.0/lib/execjs.rb:5:in `&lt;module:ExecJS&gt;'&#x000A;        from /usr/local/share/gems/gems/execjs-1.4.0/lib/execjs.rb:4:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/coffee-script-2.2.0/lib/coffee_script.rb:1:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/coffee-script-2.2.0/lib/coffee-script.rb:1:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/handlers/coffeescript_handler.rb:8:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/handler_chains.rb:14:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/pipeline.rb:2:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/engine.rb:6:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/cli/generate.rb:1:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/cli/invoker.rb:4:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/bin/awestruct:6:in `&lt;top (required)&gt;'&#x000A;        from /usr/local/bin/awestruct:23:in `load'&#x000A;        from /usr/local/bin/awestruct:23:in `&lt;main&gt;'</code></pre>
+              <p>顾名思义，提示没有JavaScript Runtime。继续Google，最后一位高人指点说装个JavaScript引擎就OK，我选择NodeJS。只可惜NodeJSF没有YUM源，只能源码编译安装，无所谓，继续:</p>
+              <pre class="command"><code class="command">wget -c 'http://nodejs.org/dist/v0.8.16/node-v0.8.16.tar.gz'&#x000A;tar zxvf node-v0.8.16.tar.gz &#x000A;cd node-v0.8.16&#x000A;./configure &#x000A;make &amp;&amp; make install</code></pre>
+              <p>又是一阵漫长的等待，搞不明白一个JS框架怎么要编译这么久，无语！最后编译完成测试一下：</p>
+              <pre class="command"><code class="command">[root@localhost node-v0.8.16]# node -v&#x000A;v0.8.16</code></pre>
+              <p>OK,继续Awestruct测试：</p>
+              <pre class="command"><code class="command">[root@localhost kuuyee]# awestruct -i -f bootstrap&#x000A;/usr/local/share/gems/gems/git-1.2.5/lib/git/lib.rb:700:in `command': git version   2&gt;&amp;1:sh: git: 未找到命令 (Git::GitExecuteError)&#x000A;        from /usr/local/share/gems/gems/git-1.2.5/lib/git/lib.rb:649:in `current_command_version'&#x000A;        from /usr/local/share/gems/gems/git-1.2.5/lib/git/lib.rb:659:in `meets_required_version?'&#x000A;        from /usr/local/share/gems/gems/git-1.2.5/lib/git.rb:30:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/deploy/base_deploy.rb:2:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/deploy/s3_deploy.rb:1:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/cli/deploy.rb:1:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/cli/invoker.rb:7:in `&lt;top (required)&gt;'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/share/rubygems/rubygems/custom_require.rb:36:in `require'&#x000A;        from /usr/local/share/gems/gems/awestruct-0.4.7/bin/awestruct:6:in `&lt;top (required)&gt;'&#x000A;        from /usr/local/bin/awestruct:23:in `load'&#x000A;        from /usr/local/bin/awestruct:23:in `&lt;main&gt;'</code></pre>
+              <p>竟然还TMD报错，不过这回不用急，只是提示没装Git，好办！那就装呗：</p>
+              <pre class="command"><code class="command">yum install git</code></pre>
+              <p>再继续Awestruct：</p>
+              <pre class="command"><code class="command">[root@localhost kuuyee]# awestruct -i -f bootstrap&#x000A;Create directory: /1003/soft/ruby/node-v0.8.16/_config&#x000A;Create directory: /1003/soft/ruby/node-v0.8.16/_layouts&#x000A;Create directory: /1003/soft/ruby/node-v0.8.16/_ext&#x000A;Create file: /1003/soft/ruby/node-v0.8.16/_ext/pipeline.rb&#x000A;Create directory: /1003/soft/ruby/node-v0.8.16/stylesheets&#x000A;directory _site/stylesheets/ &#x000A;directory images/ &#x000A;directory javascripts/ &#x000A;   create stylesheets/styles.scss &#x000A;   create images/glyphicons-halflings.png &#x000A;   create images/glyphicons-halflings-white.png &#x000A;   create javascripts/bootstrap-alert.js &#x000A;   create javascripts/bootstrap-button.js &#x000A;   create javascripts/bootstrap-carousel.js &#x000A;   create javascripts/bootstrap-collapse.js &#x000A;   create javascripts/bootstrap-dropdown.js &#x000A;   create javascripts/bootstrap-modal.js &#x000A;   create javascripts/bootstrap-popover.js &#x000A;   create javascripts/bootstrap-scrollspy.js &#x000A;   create javascripts/bootstrap-tab.js &#x000A;   create javascripts/bootstrap-tooltip.js &#x000A;   create javascripts/bootstrap-transition.js &#x000A;   create javascripts/bootstrap-typeahead.js &#x000A;   create _site/stylesheets/styles.css &#x000A;.&#x000A;Now you're awestruct!&#x000A;.&#x000A;To generate your site continuous during development, simply run:&#x000A;.&#x000A;  awestruct -d&#x000A;.&#x000A;and visit your site at&#x000A;.&#x000A;  http://localhost:4242/&#x000A;.&#x000A;Create file: /1003/soft/ruby/node-v0.8.16/_layouts/base.html.haml&#x000A;Create file: /1003/soft/ruby/node-v0.8.16/index.html.haml</code></pre>
+              <p><strong>Congratulations!</strong> 这回真的恭喜你了！赶紧部署一下：</p>
+              <pre class="command"><code class="command">[root@localhost kuuyee]#  awestruct -d&#x000A;Unable to locate profile: development&#x000A;Using profile: NONE&#x000A;Generating site: http://localhost:4242&#x000A;Generating: /1003/awestruct-sample/_site/images/glyphicons-halflings-white.png&#x000A;Generating: /1003/awestruct-sample/_site/images/glyphicons-halflings.png&#x000A;Generating: /1003/awestruct-sample/_site/index.html&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-alert.js&#x000A;/usr/local/share/gems/gems/awestruct-0.4.7/lib/awestruct/handlers/interpolation_handler.rb:35: Use RbConfig instead of obsolete and deprecated Config.&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-button.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-carousel.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-collapse.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-dropdown.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-modal.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-popover.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-scrollspy.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-tab.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-tooltip.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-transition.js&#x000A;Generating: /1003/awestruct-sample/_site/javascripts/bootstrap-typeahead.js&#x000A;Analyzing:  /1003/awestruct-sample/_site/stylesheets/styles.css&#x000A;[Listen warning]:&#x000A;  Missing dependency 'rb-inotify' (version '~&gt; 0.8.8')!&#x000A;  Please run the following to satisfy the dependency:&#x000A;    gem install --version '~&gt; 0.8.8' rb-inotify&#x000A;.  &#x000A;  For a better performance, it's recommended that you satisfy the missing dependency.&#x000A;  Listen will be polling changes. Learn more at https://github.com/guard/listen#polling-fallback.&#x000A;.&#x000A;&gt;&gt; Thin web server (v1.4.1 codename Chromeo)&#x000A;&gt;&gt; Maximum connections set to 1024&#x000A;&gt;&gt; Listening on 0.0.0.0:4242, CTRL+C to stop</code></pre>
+              <p>打开 <a href="http://localhost:4242/">http://localhost:4242/</a> 看看吧！</p>
+              <p><img src="/images/bootstrap.png" title="BootStrap网站模板" alt="BootStrap网站模板" /></p>
+              <p>细心的童鞋一定会注意到部署输出有警告，我是属于不想看到任何警告的人，所以还得继续，清楚警告：</p>
+              <pre class="command"><code class="command">gem install --version '~&gt; 0.8.8' rb-inotify</code></pre>
+              <p>再次部署访问就不会有警告了！</p>
+              <p><strong>大功告成！祝愿各位童鞋安装成功！</strong></p>
+            </p>
+            <hr>
+          </div>
+          <div class="pagination-links"><span class="current-page">1</span> </div>
+        </div>
+        <div class="span3">
+          <a href="/awestruct/feed.atom">
+            <img src="/images/services/rss_32.png">
+          </a>
+          <a href="/awestruct/feed.atom">
+            Feed for
+            Awestruct
+          </a>
+          <h2>
+            Authors
+          </h2>
+          <ul class="author">
+            <li>
+              <span>
+                <a href="http://kuuyee.github.io/kuuyee/">kuuyee</a>
+              </span>
+            </li>
+          </ul>
+          <h2>
+            Tags
+          </h2>
+          <div class="tags-cloud">
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/as/">AS</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/awestruct/">Awestruct</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/bootstrap/">BootStrap</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/eclipse/">Eclipse</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/gem/">Gem</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/git/">Git</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/ide/">IDE</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/jboss/">Jboss</a>
+            </span>
+            <span class="tags tags-6">
+              <a href="http://kuuyee.github.io/linux/">Linux</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/postgresql/">PostgreSQL</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/rhel/">RHEL</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/ruby/">Ruby</a>
+            </span>
+            <span class="tags tags-0">
+              <a href="http://kuuyee.github.io/theme/">Theme</a>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="container">
+        <p style="text-align: center;">&copy;2013 光子CI之旅</p>
+      </div>
+    </footer>
+    <script src="/javascripts/jquery.js" type="text/javascript"></script>
+    <script>
+      $(document).ready(function() {
+        $("pre.prettyprint code").removeClass("prettyprint").removeClass("linenums");
+        prettyPrint();
+      });
+    </script>
+    <script>
+      $(document).ready(function() {
+        var pathname = window.location.pathname;
+        console.log(pathname);
+        $("body > .navbar a[href='" + pathname + "']").closest("li").addClass("active");
+        $("body > #content ul.nav a[href='" + pathname + "#content']").closest("li").addClass("active");
+      });
+    </script>
+    <script src="/javascripts/bootstrap-transition.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-alert.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-modal.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-dropdown.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-scrollspy.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-tab.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-tooltip.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-popover.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-button.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-collapse.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-typeahead.js" type="text/javascript"></script>
+    <script src="/javascripts/bootstrap-affix.js" type="text/javascript"></script>
+    <script src="/javascripts/holder.js" type="text/javascript"></script>
+    <script src="/javascripts/prettify.js" type="text/javascript"></script>
+    <script src="/javascripts/application.js" type="text/javascript"></script>
+  </body>
+</html>
