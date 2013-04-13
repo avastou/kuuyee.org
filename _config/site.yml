@@ -1,0 +1,17 @@
+encoding: UTF-8
+title: 光子CI之旅
+author: kuuyee 
+
+asciidoc:
+  engine: asciidoctor
+
+profiles:
+  development:
+    base_url: /
+#    disqus_developer: true
+    dev: true
+  production:
+    base_url: http://kuuyee.github.io/
+    deploy: 
+      host: github_pages 
+      branch: master

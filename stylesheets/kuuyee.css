@@ -1,0 +1,59 @@
+/* Tweak navbar brand link to be super sleek
+-------------------------------------------------- */
+body > .navbar .brand  {
+  padding-right: 7px;
+  padding-left: 0;
+  margin-left: 20px;
+  background-image: url(../images/sh_logo_tm.png);
+  float: left;
+  color: #999;
+  font-weight: bold;
+  text-shadow: 0 1px 0 rgba(255,255,255,.1), 0 0 30px rgba(255,255,255,.125);
+  -webkit-transition: all .2s linear;
+     -moz-transition: all .2s linear;
+          transition: all .2s linear;
+}
+
+/*
+.marketing h1 {
+    font-size: 40px;
+    font-weight: 300;
+    margin: 0 0 27px -300px;
+    text-align: center;
+}
+
+.marketing p {
+    margin-right: 250px;
+}
+*/
+.sh-logo {
+  height: 35px;
+  width: 35px; }
+
+.marketing .bs-icon {
+  float: left;
+  margin: 8px 10px 0 0;
+  opacity: .8;
+}
+
+.marketing h2 {
+  font-size: 22px;
+  line-height: 20px;
+  text-align: left;
+}
+
+/* Icons
+------------------------- */
+.the-icons  {
+  margin-left: 0;
+  list-style: none;
+}
+.the-icons li {
+  float: left;
+  width: 100%;
+  line-height: 25px;
+  text-align: left;
+}
+.the-icons i:hover {
+  background-color: rgba(255,0,0,.25);
+}

@@ -1,0 +1,62 @@
+---
+layout: base
+---
+// general layout copied from the layout blog
+.row
+  .span9
+    - if not page.posts.nil?
+      - member = site.people.values.detect{|member| member.name == page.posts[0].author[0].to_s}
+      - sanitized_member = page.posts[0].author[0].primary_page.url.split("/")[-1].to_s
+    %h1
+      In relation to 
+      -if member
+        = member.name
+    - if not page.posts.nil?
+      - member = site.people.values.detect{|member| member.name == page.posts[0].author[0].to_s}
+      - for post in page.posts
+        .blogpost
+          %h2
+            %a{:href=>post.url}= post.title
+          .blogtagbar
+            - post.author.each do |author|
+              %a{:href=>author.primary_page.url}
+                = author
+              &nbsp;
+            |&nbsp;
+            #{post.date.strftime( '%Y-%m-%d' )}
+            &nbsp;|&nbsp;
+            - post.tags.each do |tag|
+              %a.label{:href=>tag.primary_page.url}
+                = tag
+              &nbsp;
+          %p
+            ~ post.content.force_encoding("UTF-8")
+          %hr
+      = page.posts.links
+
+  .span3
+    - if member
+      %a{:href=>"/#{sanitized_member}/feed.atom"}
+        %img{:src=>'/images/services/rss_32.png'}
+      %a{:href=>"/#{sanitized_member}/feed.atom"}
+        Feed for
+        = member.name
+    - else
+      %a{:href=>'/feed.atom'}
+        %img{:src=>'/images/services/rss_32.png'}
+      %a{:href=>'/feed.atom'}
+        Feed
+    - if member
+      .expandable
+        %h2 Bio
+        #{member.content}
+    %h2
+      Authors
+    %ul.author
+      - for author in site.posts_author
+        %li
+          %span
+            %a{:href=>site.base_url + author.primary_page.url}= author.to_s.force_encoding("UTF-8")
+    %h2
+      Tags
+    = site.posts_tags_cloud
