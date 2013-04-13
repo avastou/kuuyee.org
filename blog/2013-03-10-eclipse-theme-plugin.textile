@@ -1,0 +1,32 @@
+---
+layout: blog-post 
+title: Eclipse配色方案插件 
+author: kuuyee 
+tags: [Eclipse, IDE, Theme]
+---
+
+最近发现了一个Eclipse配色方案插件，这回给Eclipse配色太方便了。
+
+插件主页：["http://eclipsecolorthemes.org/":http://eclipsecolorthemes.org/]
+
+插件提供了上万种配色方案，非常漂亮，上图看下：
+
+!/images/eclipse/eclipse_theme_04.jpg(找不到方法异常)!
+
+安装很简单，打开 *Eclipse Marketplace*
+
+!/images/eclipse/eclipse_theme_01.jpg(找不到方法异常)!
+
+查找 *Eclipse Color Theme*，会找到这个插件。
+
+!/images/eclipse/eclipse_theme_02.jpg(找不到方法异常)!
+
+安装完成后进入 *Preferences --> Appearance --> Color Theme* 就可选择主题了
+
+!/images/eclipse/eclipse_theme_03.jpg(找不到方法异常)!
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+---
+layout: blog-post 
+title: JBoss7发布 
+author: kuuyee
+tags: [Jboss, AS]
+---
+
+image::/jboss/as7.JPG["Company Logo",align="left"]
+
+*AS7 download:*
+
+http://download.jboss.org/jbossas/7.0/jboss-as-7.0.0.Final/jboss-as-web-7.0.0.Final.zip[http://download.jboss.org/jbossas/7.0/jboss-as-7.0.0.Final/jboss-as-web-7.0.0.Final.zip]
+
+
+*AS7带来的新特性*
+
+- Unparalleled Speed
+- Modular Design
+- Exceptionally Lightweight
+- Elegant Administration
+- Strict Compliance
+- Easily Testable
+- First class, modern components
