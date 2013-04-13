@@ -55,7 +55,7 @@ Awestruct::Extensions::Pipeline.new do
     :posts, 
     '/feed.atom', 
     :num_entries=>100,
-    :content_url=>'http://in.relation.to',
-    :feed_title=> 'In Relation To' )
+    :content_url=>'http://www.kuuyee.org',
+    :feed_title=> 'KuuYee CI Tour' )
 end
 
