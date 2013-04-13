@@ -8,7 +8,7 @@ layout: base
       - member = site.people.values.detect{|member| member.name == page.posts[0].author[0].to_s}
       - sanitized_member = page.posts[0].author[0].primary_page.url.split("/")[-1].to_s
     %h1
-      光子原创 
+      In relation to 
       -if member
         = member.name
     - if not page.posts.nil?

@@ -19,16 +19,7 @@
     .navbar.navbar-inverse.navbar-fixed-top
       .navbar-inner
         .container
-          .github-banner.hidden-phone
-            %a{ :href=>'https://github.com/kuuyee/kuuyee.org' }
-              %img{ :style=>'position:absolute;top:0;right:0;border:0;', :src=>'/images/forkme_right_white_ffffff.png', :alt=>'Fork me on GitHub'}
-          %a{:class=>'btn btn-navbar', 'data-toggle'=>'collapse', 'data-target'=>'.nav-collapse'}
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
-          %a.brand{ :href=>'/index.html' } 
-            %img{ :src=>'/images/kuuyee_logo.png', :alt=>'#{site.title}', :class=>"kuuyee-logo" }
-            #{site.title}
+          %a.brand{ :href=>'/index.html' } #{site.title}
           .nav-collapse
             %ul.nav
               %li
@@ -42,11 +33,11 @@
               %button{ :type=>'submit', :class=>'btn'} Sign in
 
     .container
-      .row{:style=>'height:30px'}
       ~ content
+      %hr
     %footer{:class=>'footer'}
       .container
-        %p{:style=> "text-align: center;"} &copy;#{Date.today.year} 光子CI之旅
+        %p{:style=> "text-align: center;"} &copy;光子CI之旅 #{Date.today.year}
 
     %script{ :type=>'text/javascript', :src=>'/javascripts/jquery.js' }
 
