@@ -1,18 +1,18 @@
 ---
-layout: docs 
-title: Jboss7 
+layout: blog-post 
+title: JBoss7发布 
+author: kuuyee
+tags: [Jboss, AS]
 ---
 
-== AsciiDoc 终于可以用了
-
-image::/bootstrap.png["Company Logo",align="left"]
+image::/jboss/as7.JPG["Company Logo",align="left"]
 
 *AS7 download:*
 
 http://download.jboss.org/jbossas/7.0/jboss-as-7.0.0.Final/jboss-as-web-7.0.0.Final.zip[http://download.jboss.org/jbossas/7.0/jboss-as-7.0.0.Final/jboss-as-web-7.0.0.Final.zip]
 
 
-*AS7 Feater中文*
+*AS7带来的新特性*
 
 - Unparalleled Speed
 - Modular Design
