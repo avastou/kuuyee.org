@@ -18,7 +18,7 @@ Awestruct::Extensions::Pipeline.new do
   extension Awestruct::Extensions::Splitter.new( :posts, 
                                                  'tags',
                                                  'templates/tags', 
-                                                 '/', 
+                                                 '/tags', 
                                                  :per_page=>30, :per_page_init=>5,
                                                  :output_home_file=>'index',
                                                  :sanitize=>true )
