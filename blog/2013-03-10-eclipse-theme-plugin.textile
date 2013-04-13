@@ -1,10 +1,9 @@
 ---
-layout: docs
+layout: blog-post 
 title: Eclipse配色方案插件 
-author: 光子
+author: kuuyee 
+tags: [Eclipse, IDE, Theme]
 ---
-
-h2. Eclipse配色方案插件
 
 最近发现了一个Eclipse配色方案插件，这回给Eclipse配色太方便了。
 
