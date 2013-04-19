@@ -2,8 +2,10 @@ encoding: UTF-8
 title: 光子CI之旅
 author: kuuyee 
 
-asciidoc:
-  engine: asciidoctor
+asciidoctor:
+  :attributes:
+    source-highlighter: coderay
+    coderay-css: style
 
 profiles:
   development:

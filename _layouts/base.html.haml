@@ -12,6 +12,8 @@
     %link{ :rel=>'stylesheet', :href=>'/stylesheets/docs.css' }
     %link{ :rel=>'stylesheet', :href=>'/stylesheets/prettify.css' }
     %link{ :rel=>'stylesheet', :href=>'/stylesheets/kuuyee.css' }
+    %style
+      - ::CodeRay::Encoders[:html]::CSS.new(:default).stylesheet
     /[if lt IE 9]
       %script{ :type=>'text/javascript', :src=>'/javascripts/html5shiv.js' }
 

@@ -3,7 +3,6 @@ layout: blog-post
 title: 下一代静态网站生成框架Awestruct在Fedora18安装全过程 
 author: kuuyee
 tags: [Ruby, Gem, Git, Awestruct, Linux, BootStrap]
-description: 10
 ---
 
 *Awestruct是非常棒的静态网站生成框架，他基于Jekyll，使用Ruby语言开发。Awestruct可以根据模板生成非常漂亮的网站，例如可以用BootStrap或者BluePrint，这两个大名鼎鼎的东东不用多说了吧，地球人都知道。废话不多说，进入主题。*

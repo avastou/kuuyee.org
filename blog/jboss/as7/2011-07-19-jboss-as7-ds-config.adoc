@@ -1,0 +1,120 @@
+---
+layout: blog-post 
+title: JBoss AS7配置MySQL数据源 
+author: kuuyee
+tags: [Jboss, AS, MySQL]
+---
+
+AS7默认的数据源是H2，虽然H2方便，但是一般的生产环境都是MySQL、ORACLE、SQLServer居多，本文描述如何在AS7配置MySQL数据源。
+
+根据Jboss社区的文档，配置一个新的数据源大致分为两步。描述如下：
+
+==== 加入JDBC驱动文件
+在JBOSS_HOME/modules目录下加入如下目录结构及文件:
+
+[source]
+JBOSS_HOME
+ +- modules
+     +- com
+         +- mysql
+             +- main     
+                 +- module.xml      
+                 +- mysql-connector-java-5.1.15.jar   (mysql的jdbc驱动jar文件,版本根据各自情况而定)
+                 +- mysql-connector-java-5.1.15.jar.index
+
+module.xml的内容如下:
+
+[source,xml]
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.0" name="com.mysql">
+  <resources>
+    <resource-root path="mysql-connector-java-5.1.15.jar"/>
+  </resources>
+  <dependencies>
+    <module name="javax.api"/>
+  </dependencies>
+</module>
+
+mysql-connector-java-5.1.15.jar.index的内容如下:
+
+[source]
+META-INF
+META-INF/services
+com
+com/mysql
+com/mysql/jdbc
+com/mysql/jdbc/configs
+com/mysql/jdbc/exceptions
+com/mysql/jdbc/exceptions/jdbc4
+com/mysql/jdbc/interceptors
+com/mysql/jdbc/jdbc2
+com/mysql/jdbc/jdbc2/optional
+com/mysql/jdbc/jmx
+com/mysql/jdbc/log
+com/mysql/jdbc/profiler
+com/mysql/jdbc/util
+org
+org/gjt
+org/gjt/mm
+org/gjt/mm/mysql
+
+==== 添加Server数据源配置
+AS7启动分为两种形式,一种是domain形式的,一种是standalone,这里我们选择standalone。
+打开JBOSS_HOME\standalone\configuration\standalone.xml文件,在<datasources>下添加如下内容:
+
+[source,xml]
+<datasource jndi-name="java:jboss/datasources/MySqlDS" pool-name="MySqlDS" enabled="true" jta="true" use-java-context="true" use-ccm="true">
+	<connection-url>
+		jdbc:mysql://192.168.1.150:3306/hospital?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8
+	</connection-url>
+	<driver>
+		com.mysql
+	</driver>
+	<transaction-isolation>
+		TRANSACTION_READ_COMMITTED
+	</transaction-isolation>
+	<pool>
+		<min-pool-size>
+			10
+		</min-pool-size>
+		<max-pool-size>
+			100
+		</max-pool-size>
+		<prefill>
+			true
+		</prefill>
+		<use-strict-min>
+			false
+		</use-strict-min>
+		<flush-strategy>
+			FailingConnectionOnly
+		</flush-strategy>
+	</pool>
+	<security>
+		<user-name>
+			runes
+		</user-name>
+		<password>
+			runes
+		</password>
+	</security>
+	<statement>
+		<prepared-statement-cache-size>
+			32
+		</prepared-statement-cache-size>
+	</statement>
+</datasource>
+
+然后在<drivers>下添加如下内容:
+
+[source,xml]
+<driver name="com.mysql" module="com.mysql">
+	<xa-datasource-class>
+		com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
+	</xa-datasource-class>
+</driver>
+
+OK,这样就完成了MySQL数据源的配置,现在用standalone的形式启动AS7,会看到输入中有MySQL数据源的的内容,如下图:
+
+image::/jboss/as702.png["Company Logo",align="left"]
+

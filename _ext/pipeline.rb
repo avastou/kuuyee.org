@@ -5,6 +5,7 @@ require 'split_atomizer'
 require 'atomizer'
 require 'paginator'
 require 'posts'
+require 'coderay'
 
 Awestruct::Extensions::Pipeline.new do
   extension Awestruct::Extensions::DataDir.new

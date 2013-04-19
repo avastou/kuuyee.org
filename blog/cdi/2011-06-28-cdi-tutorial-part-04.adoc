@@ -1,0 +1,123 @@
+---
+layout: blog-post
+title: (译)JavaEE6规范 CDI教程第四部分
+author: kuuyee
+tags: [JEE, CDI]
+---
+
+
+原文链接: http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial[http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial]
+
+本部分讲述*@Producer*。
+
+=== 使用@Producer来决定如何创建
+可能你希望从AutomatedTellerMachineImpl中把选取传输器的方法分离出来。
+
+你可以创建一个Producer方法来决定创建和选取传输器，看下面的实例：
+[source,java]
+----
+//TransportFactory决定使用/创建哪个传输器
+package org.cdi.advocacy;
+
+import javax.enterprise.inject.Produces;
+
+public class TransportFactory {
+        
+        private boolean useJSON = true;
+        private boolean behindFireWall = true;
+
+        
+        @Produces ATMTransport createTransport() {
+                //Look up config parameters in some config file or LDAP server or database
+
+                System.out.println("ATMTransport created with producer makes decisions");
+                
+                if (behindFireWall) {
+                        if (useJSON) {
+                                System.out.println("Created JSON transport");
+                                return new JsonRestAtmTransport();
+                        } else {
+                                System.out.println("Created SOAP transport");
+                                return new SoapAtmTransport();
+                        }
+                } else {
+                        System.out.println("Created Standard transport");
+                        return new StandardAtmTransport();
+                }
+        }
+
+}
+----
+
+把创建动作从AutomatedTellerMachineImpl代码中分离出来是比较高级的做法。
+
+可能你不总是这么做，但是如果是的话，producer可以帮助你。
+
+输出和前面的一样。
+
+Output
+----
+ATMTransport created with producer makes decisions
+Created JSON transport
+deposit called
+communicating with bank via JSON REST transport
+----
+
+=== 在@Producer中使用限定词来决定如何创建
+这个例子在最后构建
+
+你同样可以吧注入项作为参数传入到producer中，如下：
+[source,java]
+----
+//TransportFactory决定使用/创建哪个传输器
+package org.cdi.advocacy;
+
+import javax.enterprise.inject.Produces;
+
+public class TransportFactory {
+        
+        private boolean useJSON = true;
+        private boolean behindFireWall = true;
+
+        
+        @Produces ATMTransport createTransport( @Soap ATMTransport soapTransport, 
+                                                @Json ATMTransport jsonTransport) {
+                //Look up config parameters in some config file
+                System.out.println("ATMTransport created with producer makes decisions");
+                
+                if (behindFireWall) {
+                        if (useJSON) {
+                                System.out.println("return passed JSON transport");
+                                return jsonTransport;
+                        } else {
+                                System.out.println("return passed SOAP transport");
+                                return soapTransport;
+                        }
+                } else {
+                        System.out.println("Create Standard transport");
+                        return new StandardAtmTransport();
+                }
+        }
+
+}
+----
+
+在上面的例子中，createTransport作为CDI的创建动作，通过传递soapTransport和jsonTransport减少了工厂方法并增加了选择方法
+
+
+[quote]
+*高级话题*
+你可能奇怪为什么单独创建*StandardAtmTransport*而不是像*soapTransport*和*jsonTransport*那样通过参数注入进来。原因是这里的*createTransport*默认使用了*@Default*和*@Any*，但是被他重写的*StandardAtmTransport*同样默认使用*@Default*和*@Any*，如果我们使用*@Default ATMTransport standardTransport*作为参数注入*StandardAtmTransport*，那么它就会尝试调用*createTransport*，这样就继续注入参数*standardTransport*，然后又会调用*createTransport*，这就产生了无限循环，知道抛出*StackTraceOverflow*异常。解决办法是创建一个*@Standard*限定注解，然后在注入标准传输器*StandardAtmTransport*。
+
+
+下面是输出内容。
+Output
+[source,java]
+----
+ATMTransport created with producer makes decisions
+return passed JSON transport
+deposit called
+communicating with bank via JSON REST transport
+----
+
+*待续..*

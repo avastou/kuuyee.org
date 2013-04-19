@@ -1,0 +1,84 @@
+---
+layout: blog-post
+title: (译)JavaEE6规范 CDI教程第二部分
+author: kuuyee
+tags: [JEE, CDI]
+---
+
+
+原文链接: http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial[http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial]
+
+本部分讲述*@Inject*和*@Produces*
+
+=== 使用@Inject注入构造器参数和变量域
+你能够注入变量域、构造器参数和setter方法(或者任何真实的方法)
+
+下面是变量域注入的例子:
+[source,java]
+----
+// AutomatedTellerMachineImpl.transport 使用@Inject来注入变量域transport
+...
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        @Inject
+        private ATMTransport transport;
+
+Example 2. AutomatedTellerMachineImpl.transport 使用@Inject来注入构造器参数
+...
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        @Inject 
+        public AutomatedTellerMachineImpl(ATMTransport transport) {
+                this.transport = transport;
+        }
+----
+
+这种灵活性让你创建的类能够容易的单元测试。
+
+=== 使用简单@Produces
+如果你创建的对象可能很复杂，这时候你可以委托一个工厂类来创建实例，而不是依赖于构造器。这种情况在CDI中你可以在你的工厂类中使用*@Produces*注解，例子如下：
+
+下面是变量域注入的例子:
+[source,java]
+----
+//TransportFactory.createTransport 使用@Produces定义一个工厂方法
+package org.cdi.advocacy;
+
+import javax.enterprise.inject.Produces;
+
+public class TransportFactory {
+                
+        @Produces ATMTransport createTransport() {
+                System.out.println("ATMTransport created with producer");
+                return new StandardAtmTransport();
+        }
+
+}
+----
+
+工厂方法能够使用限定词就像类描述一样。在这个例子中我们没有使用限定词。AutomatedTellerMachineImpl不需要指定任何特定的限定词。下面例子的AutomatedTellerMachineImpl接收了一个简单生产者。
+
+[source,java]
+----
+//AutomatedTellerMachineImpl.transport 使用@Inject来注入构造器参数
+import javax.inject.Inject;
+import javax.inject.Named;
+
+@Named("atm")
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        @Inject
+        private ATMTransport transport;
+        ...
+----
+
+运行AtmMain来查看输出，看看是否和你的理解一致。
+Output
+[source,java]
+----
+ATMTransport created with producer
+deposit called
+communicating with bank via Standard transport
+----
+
+*待续..*

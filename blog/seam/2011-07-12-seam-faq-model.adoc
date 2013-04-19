@@ -1,0 +1,51 @@
+---
+layout: blog-post
+title: JavaEE6 FAQs 之@Model
+author: kuuyee
+tags: [Seam, JEE, CDI]
+---
+
+原文链接: http://seamframework.org/Documentation/WhatIsThePurposeOfTheModelAnnotation[http://seamframework.org/Documentation/WhatIsThePurposeOfTheModelAnnotation]
+
+===@Model注解的用途
+@Model注解做了如下的事情:
+
+- 使bean拥有request-scoped周期范围(取代默认的@dependent)
+- 给bean一个EL命名
+
+创建一个请求范围并且赋予命名的bean，就像一个标注有@RequestScoped和@Named的类，自从这样的注解组合频繁的出现在Web应用中，CDI就提供了内建的注解@Model方便使用。
+
+[source,java]
+----
+//@Model例子
+@Model
+public class SampleBean
+{
+   private String value;
+   public String getValue() { return value; }
+   public String setValue(String value) { this.value = value; }
+}
+----
+
+现在这个bean可以在JSF视图中使用了:
+[source,html]
+---- 
+<h:inputText value="#{sampleBean.value}"/>
+----
+
+通常如果你想在JSF页面中通过EL命名访问bean，你可能需要给类标注*@Dependent*注解。否则，任何通过JSF input设置的值都会立即失效。这样是为什么*CDI*提供了@Model类型；它让你给bean一个命名，并且一举设置bean的周期为*@RequestScoped*。如果你确实在*@dependent*周期里通过JSF页面中访问一个bean，注入一个不同的bean，通过getter方法来保留给*EL*。
+
+一个stereotype是用来聚合其它注解的注解。*@Model*是一个*CDI*内置stereotype，定义如下：
+[source,java]
+---- 
+@Named 
+@RequestScoped 
+@Stereotype 
+@Target({TYPE, METHOD}) 
+@Retention(RUNTIME) 
+public @interface Model {}
+----
+
+*@Modelstereotype*注解应该频繁的应用在web应用中。
+
+

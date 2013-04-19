@@ -1,0 +1,399 @@
+---
+layout: blog-post
+title: (译)JavaEE6规范 CDI教程第一部分
+author: kuuyee
+tags: [JEE, CDI]
+---
+
+
+原文链接: http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial[http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial]
+
+=== 引言
+此教程讲述 *DI* (依赖注入)，并且涵盖了 *CDI* (上下文依赖注入)的一些特性，比如类型安全注解配置、替换选择等内容。
+
+http://jcp.org/aboutJava/communityprocess/final/jsr299/index.html[CDI] 是依赖注入 *(DI)* 和拦截 *(AOP)* 的Java标准规范。*DI* 和*AOP*有着很高的知名度，*Java*需要处理*DI*和*AOP*以便在此之上构建其它的标准。*DI*和*AOP*是很多*Java*框架的基础。
+
+*CDI*是*JavaEE* 6的基础。它很快就得到了 http://www.caucho.com/resin/[Caucho's Resin]、 http://www.ibm.com[IBM's WebSphere]、 http://glassfish.java.net/[Oracle's Glassfish]、 http://www.jboss.org[Red Hat's JBoss]和众多应用服务器的支持。*CDI*与*Spring*和*Guice*框架非常相似，就像*JPA*很像*ORM*。*CDI*简化了对于*DI*和*AOP*的*API*。如果你使用过*Spring*或者*Guice*，你会发现*CDI*更容易学习和使用。如果你是依赖注入*(DI)*的新手，那么*CDI*能让你迅速理解*DI*。*CDI*更容易学习和使用。
+
+CDI能够独立使用也能嵌入的任何应用中。
+
+这个教程在发布三年之久的Spring 2.5 DI 教程 http://java.dzone.com/articles/dependency-injection-an-introd[（使用Spring “new” DI 注解）]之后出现并不奇怪。它将有趣的对比三年前缩写的Spring DI注解。
+
+=== 本教程设计目标
+本教程的目标是描述和解读不包含复杂的EJB3.1和JSF的DI和CDI。
+
+CDI的优势是能够在EJB和JSF之外。本教程只关注CDI。再次声明在本教程中没有JSF2和EJB3.1的内容。很多文章和教程都涵盖如何使用CDI（JEE6规范）。本教程并不是，这里只是CDI。
+
+本教程有完整的代码示例，你可以下载试用。
+
+我们将放缓速度，逐步的从基础开始。一旦你理解了基本原理，我们会适当的加快脚步。
+
+所有的示例代码都以确保能够运行。我们不会键入临时代码，如果代码不能运行，那它就不属于本教。
+
+示例代码都有清晰的标题，所以你可以把教程看做一个菜单，将来你如果想使用CDI DI的某些特性，可以方便的在菜单目录中查找示例。
+
+装饰器、扩展、拦截器、范围都不在本教程的范围之内。
+
+如果这个教程通过google讨论组收到足够的反馈和评论，我将加入CDI AOP（装饰器和拦截器）综合教程还有扩展。
+
+更多的建议和反馈会鼓舞我做的更好。
+
+=== 依赖注入
+依赖注入(DI)是为软件组件提供扩展依赖的过程。DI能够让你的代码架构很简洁。
+
+它帮助你用测试驱动开发的方式设计接口，提供统一的方式注入依赖。例如，一个数据访问对象（DAO）可能依赖一个数据库连接。
+
+取而代之，使用JNDI查找数据库连接，你不需要注入它。
+
+考虑到JNDI是彻底的翻查，DI框架取代对象查找其它准备好的对象（依赖的），一个DI容器能注入这些依赖的对象。这被成为“好莱坞原则”，“不要给我打电话（查找对象），我会打给你（注入对象）”。
+
+如果你接触过CRC卡，你能想象出一个依赖就像一个合作者。一个合作者是一个对象，另一个对象需要执行它的角色。例如，就像DAO（数据访问对象）需要一个JDBC连接对象。
+
+==== 依赖注入-自动柜员机 不用CDI或Spring或Guice版
+比如说你有一个自动柜员机(ATM，在其它国家也叫自动银行机)并需要能够和银行通话。它需要调用一个传输对象来做此事。在这个例子中，传输对象掌控对银行的底层通讯。
+
+这个例子可以用下面两个接口来描述:
+[source,java]
+----
+// AutomatedTellerMachine接口
+package org.cdi.advocacy;
+
+import java.math.BigDecimal;
+
+public interface AutomatedTellerMachine {
+
+        public abstract void deposit(BigDecimal bd);  //存钱
+
+        public abstract void withdraw(BigDecimal bd);  //取钱
+
+}
+----
+
+[source,java]
+----
+// ATMTransport接口
+package org.cdi.advocacy;
+
+public interface ATMTransport {
+        public void communicateWithBank(byte[] datapacket);
+}
+----
+
+现在 *AutomatedTellerMachine* 需要一个传输器来执行它的意图，也就是存钱和取钱。要执行这个任务， *AutomatedTellerMachine* 可能会依赖很多对象和与这些依赖合作才能完成工作。
+
+一个 *AutomatedTellerMachine* 的实现可能看起来像这样:
+[source,java]
+----
+// AutomatedTellerMachineImpl类
+package org.cdi.advocacy;
+...
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        private ATMTransport transport;
+        
+        ...
+        public void deposit(BigDecimal bd) {
+                System.out.println("deposit called");
+                transport.communicateWithBank(...);
+        }
+
+        public void withdraw(BigDecimal bd) {
+                System.out.println("withdraw called");
+                transport.communicateWithBank(...);
+        }
+
+}
+----
+
+*AutomatedTellerMachineImpl* 不需要关系传输器如何从银行进行存款和取款操作。这是一个中间层允许我们用不同的传输器实现来替换，例如下面的例子：
+
+==== 三个传输器例子:SoapAtmTransport、StandardAtmTransport和JsonAtmTransport
+[source,java]
+----
+//StandardAtmTransport
+package org.cdi.advocacy;
+
+
+public class StandardAtmTransport implements ATMTransport {
+
+        public void communicateWithBank(byte[] datapacket) {
+                System.out.println("communicating with bank via Standard transport");
+                ...
+        }
+
+}
+----
+
+[source,java]
+----
+//SoapAtmTransport
+package org.cdi.advocacy;
+
+public class SoapAtmTransport implements ATMTransport {
+
+        public void communicateWithBank(byte[] datapacket) {
+                System.out.println("communicating with bank via Soap transport");
+                ...
+        }
+
+}
+----
+
+[source,java]
+----
+//JsonRestAtmTransport
+package org.cdi.advocacy;
+
+public class JsonRestAtmTransport implements ATMTransport {
+
+        public void communicateWithBank(byte[] datapacket) {
+                System.out.println("communicating with bank via JSON REST transport");
+        }
+
+}
+----
+
+注意 *ATMTransport* 接口的可能实现。*AutomatedTellerMachineImpl* 不需要关心使用的是那个传输器。并且，对于测试和开发，需要替换通话的真实银行，你可以容易的通过 *Mockito和EasyMock* 实现，甚至你能够编写一个SimulationAtmTransport模拟实现用来测试。
+DI的概念超越 *CDI、Guice* 和 *Spring* 。因此，你不用 *CDI、Guice* 或 *Spring*就能够实现 *DI*，比如下面的例子：
+[source,java]
+----
+// AtmMain: 不使用CDI, Spring或Guice的DI实现
+package org.cdi.advocacy;
+
+public class AtmMain {
+        
+        public void main (String[] args) {
+                AutomatedTellerMachine atm = new AutomatedTellerMachineImpl();
+                ATMTransport transport = new SoapAtmTransport();
+                /* Inject the transport. */           
+                ((AutomatedTellerMachineImpl)atm).setTransport(transport);
+                
+                atm.withdraw(new BigDecimal("10.00"));
+                
+                atm.deposit(new BigDecimal("100.00"));
+        }
+
+}
+----
+
+注入不同的传输器只不过是调用了不同的setter方法，如下所示：
+[source,java]
+----
+//不使用CDI, Spring或Guice的DI实现 : setTransport
+ATMTransport transport = new SimulationAtmTransport();
+((AutomatedTellerMachineImpl)atm).setTransport(transport);
+----
+
+假定在前面我们为 *AutomateTellerMachineImpl* 添加了一个 *setTransport* 方法。注意，你只要使用构造器参数就能替换setter方法。因此，保持 *AutomateTellerMachineImpl* 的接口简洁。
+
+==== 运行例子
+为了马上能运行例子，我们为你准备了一些pom.xml文件。这里是运行例子的指令说明。
+
+==== 依赖注入-自动柜员机 使用CDI版
+要使用CDI管理依赖，需要做如下工作：
+
+- 在META-INF资源目录下创建一个空的bean.xml
+- 在 *AutomatedTellerMachineImpl* 内的 *setTransport* 方法上使用 *@Inject* 注解
+- 在 *StandardAtmTransport* 上标注 *@Default* 注解
+- 在 *SoapAtmTransport* 和 *JsonRestAtmTransport* 上标注 *@Alternative* 注解
+- 在 *AutomatedTellerMachineImpl* 上标注 *@Named* 注解一遍其容易被查找；给它一个命名“atm”
+- 使用CDI beanContainer查找atm，执行存款和取款
+
+==== 在META-INF资源目录下创建一个空的bean.xml
+*CDI* 需要有一个 *bean.xml* 文件放置在 *META-INF* 内，*META-INF* 可以是jar文件或classpath或web应用 *WEB-INF* 下的。这个文件完全可以是空的(大小为0 bytes)。如果你的war或jar内的 *META-INF* 目录下没有这个beans.xml，那么CDI将不会处理它。另外CDI将会检索jar和war文件内的beans.xml，甚至它为0 bytes。
+
+META-INF/beans.xml，可能是空文件
+[source,xml]
+----
+<beans xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/beans_1_0.xsd">
+
+</beans>
+----
+
+注意，我们在 *beans.xml* 文件中使用<beans>作为根元素并带有命名空间。尽管 *beans.xml* 可以完全是空的，但是加入这个起始元素是个好的习惯。这同样可以避免IDE对0 byte的 *beans.xml* 发出警告。（我憎恨IDE警告，它使我分散精力）
+
+==== 在AutomatedTellerMachineImpl内的setTransport方法上使用@Inject注解
+*@Inject* 注解用来标记要注入的位置。你可以对构造器参数、实例变量和setter方法的属性使用此注解。在这个例子中，我们注解在 *setTransport* 方法上(transport属性的setter方法)。
+[source,java]
+----
+// AutomatedTellerMachineImpl使用@Inject注入一个transport
+package org.cdi.advocacy;
+
+...
+
+import javax.inject.Inject;
+
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        private ATMTransport transport;
+
+        @Inject
+        public void setTransport(ATMTransport transport) {
+                this.transport = transport;
+        }
+
+       ...
+
+}
+----
+
+默认情况下， *CDI* 将会寻找 *ATMTransport* 接口的实现类，一旦找到就会创建一个实例并用setter方法setTransport注入这个实例到 *ATMTransport* 中。如果我们只有一个 *ATMTransport* 实例在classpath中,那么我们就不需要注解其它的 *ATMTransport* 实现。现在我们有三个实现，分别命名为 *StandardAtmTransport* ， *SoapAtmTransport* 和 *JsonAtmTransport* ，这就需要我们把其中两个注解为 *@Alternatives* ，还有一个注解为 *@Default* 。
+
+==== 在StandardAtmTransport上标注@Default注解
+当前的例子里， *StandardAtmTransport* 是transport的默认实现，所以我们给他加上 *@Default* 注解，如下：
+[source,java]
+----
+//StandardAtmTransport使用注解@Default
+package org.cdi.advocacy;
+
+import javax.enterprise.inject.Default;
+
+@Default
+public class StandardAtmTransport implements ATMTransport {
+    ...
+----
+
+==== 在SoapAtmTransport和JsonRestAtmTransport上标注@Alternative注解
+如果我们没有给他们使用 *@Alternative* 注解，那只有等到给他们注解为 *@DefaultCDI* 才会关注它们。让我们来给 *JsonRestAtmTransport* 和 *SoapRestAtmTransport* 加上 *@Alternative* 注解以便 *CDI* 不会感到迷惑。
+[source,java]
+----
+//JsonRestAtmTransport使用注解@Alternative
+package org.cdi.advocacy;
+
+import javax.enterprise.inject.Alternative;
+
+@Alternative
+public class JsonRestAtmTransport implements ATMTransport {
+
+...
+}
+----
+
+[source,java]
+----
+// SoapAtmTransport使用注解@Alternative
+package org.cdi.advocacy;
+
+import javax.enterprise.inject.Alternative;
+
+@Alternative
+public class SoapAtmTransport implements ATMTransport {
+   ...
+}
+----
+
+==== 在AutomatedTellerMachineImpl上标注@Named注解以便其容易被查找；给它一个命名“atm”
+我们不在 *Java EE6* 应用中使用 *AutomatedTellerMachineImpl* ，而只是通过 *beanContainer* 来查找它。让我们给它一个容易理解的名字，比如"atm"。使用 *@Name* 注解来给他命名。在 *JavaEE 6* 应用中同样可以使用 *@Name* 注解来让bean可以通过统一EL语言(表达式语言标准，用来在JSP和JSF组件中使用)。
+
+下面是使用 *@Named* 给 *AutomatedTellerMachineImpl* 起名为"atm"的代码:
+[source,java]
+----
+//AutomatedTellerMachineImpl使用注解@Name
+[source,java]
+package org.cdi.advocacy;
+
+import java.math.BigDecimal;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+@Named("atm")
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+       ...
+
+}
+----
+
+注意，如果你没有在 *@Name* 注解中提供名字，那么默认名字就是类名把第一个字母小写，如下：
+
+[source,java]
+----
+//名字默认值
+@Named
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+       ...
+
+}
+----
+
+这时候名字默认就是automatedTellerMachineImpl。
+
+==== 使用CDI beanContainer查找atm，执行存款和取款
+最后我们使用beanContainer查找atm并执行一些存款操作。
+[source,java]
+----
+// AtmMain通过名字查找atm
+package org.cdi.advocacy;
+
+...
+
+public class AtmMain {
+
+        ...
+        ...
+
+        public static void main(String[] args) throws Exception {
+                AutomatedTellerMachine atm = (AutomatedTellerMachine) beanContainer
+                                .getBeanByName("atm");
+
+                atm.deposit(new BigDecimal("1.00"));
+
+        }
+
+}
+----
+
+如果你在命令行运行它,你将得到如下输出
+
+*Output*
+[source]
+----
+deposit called
+            communicating with bank via Standard transport
+----
+
+你同样可以通过类型查找AtmMain。
+
+[source,java]
+----
+//AtmMain通过类型查找atm
+package org.cdi.advocacy;
+
+...
+
+public class AtmMain {
+
+        ...
+        ...
+
+    public static void main(String[] args) throws Exception {
+        AutomatedTellerMachine atm = beanContainer.getBeanByType(AutomatedTellerMachine.class);
+        atm.deposit(new BigDecimal("1.00"));
+    }
+
+}
+----
+
+自从CDI注入是类型安全的，通过名字查找就可能失效。注意我们有一个向下转型在应用 http://download.oracle.com/javase/tutorial/java/generics/index.html[Java泛型] 的时候。
+
+如果你去掉 *StandardATMTransport* 上的 *@Default* 注解，你将会得到同样的输出。但是如果你去掉其它两个 *transport JsonATMTransport* 和 *SoapATMTransport* 上的 *@Alternative，CDI* 将会报出如下错误信息：
+
+*Output*
+[source]
+----
+Exception in thread "main" java.lang.ExceptionInInitializerError
+Caused by: javax.enterprise.inject.AmbiguousResolutionException: org.cdi.advocacy.AutomatedTellerMachineImpl.setTransport: 
+Too many beans match, because they all have equal precedence.  
+See the @Stereotype and <enable> tags to choose a precedence.  Beans:
+    ManagedBeanImpl[JsonRestAtmTransport, {@Default(), @Any()}]
+    ManagedBeanImpl[SoapAtmTransport, {@Default(), @Any()}]
+    ManagedBeanImpl[StandardAtmTransport, {@javax.enterprise.inject.Default(), @Any()}]
+    ...
+----
+
+CDI期望找到一个并且只有一个适合的注入。后面我们将讲述如何使用替换选择(alternative)。
+
+*待续..*

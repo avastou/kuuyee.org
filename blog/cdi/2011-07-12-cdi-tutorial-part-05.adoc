@@ -1,0 +1,92 @@
+---
+layout: blog-post
+title: (译)JavaEE6规范 CDI教程第五部分
+author: kuuyee
+tags: [JEE, CDI]
+---
+
+原文链接: http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial[http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial]
+
+本部分讲述使用多个*@Qualifiers*来进一步区分注入类型
+
+=== 在同一个注入点上使用多个@Qualifiers来进一步区分
+你可以使用多个限定注解来进一步区分你的注入目标。
+
+我们定义限定注解*SuperFast*和*StandardFrameRelaySwitchingFlubber*来演示这个用法。那样的话我们就有第二个传输器*StandardFrameRelaySwitchingFlubber和SuperFast*，我们要注入的传输器不仅有*StandardFrameRelaySwitchingFlubber*，还有*SuperFast*。
+
+首先我们来定义限定注解，如下：
+[source,java]
+----
+// 定义新的SuperFast限定注解
+package org.cdi.advocacy;
+
+...
+
+@Qualifier @Retention(RUNTIME) @Target({TYPE, METHOD, FIELD, PARAMETER})
+public @interface SuperFast {
+
+}
+----
+
+[source,java]
+----
+// 定义另一个新的StandardFrameRelaySwitchingFlubber限定注解
+package org.cdi.advocacy;
+
+...
+
+@Qualifier @Retention(RUNTIME) @Target({TYPE, METHOD, FIELD, PARAMETER})
+public @interface StandardFrameRelaySwitchingFlubber {
+
+}
+----
+
+OK，下面的代码是给*SuperFastAtmTransport*同时使用*@SuperFast*和*@StandardFrameRelaySwitchingFlubber*限定注解。
+[source,java]
+----
+// SuperFastAtmTransport使用两个限定注解
+package org.cdi.advocacy;
+
+@SuperFast @StandardFrameRelaySwitchingFlubber 
+public class SuperFastAtmTransport implements ATMTransport {
+        public void communicateWithBank(byte[] datapacket) {
+                System.out.println("communicating with bank via the Super Fast transport " );
+        }
+}
+----
+
+Ok，我们也给*StandardAtmTransport*加上*StandardFrameRelaySwitchingFlubber*限定注解。
+[source,java]
+----
+// StandardAtmTransport使用一个限定注解
+package org.cdi.advocacy;
+
+
+@StandardFrameRelaySwitchingFlubber @Default
+public class StandardAtmTransport implements ATMTransport {
+        public void communicateWithBank(byte[] datapacket) {
+                System.out.println("communicating with bank via Standard transport");
+        }
+
+}
+----
+
+接下来，我希望我的自动柜员机使用*SuperFast*传输并带有*StandardFrameRelaySwitchingFlubber*，我必须在注入点同时使用它们，如下：
+[source,java]
+----
+// AutomatedTellerMachineImpl更改为使用两个限定注解
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        @Inject @SuperFast @StandardFrameRelaySwitchingFlubber
+        private ATMTransport transport;
+       ...
+
+deposit called
+                communicating with bank via the Super Fast transport
+----
+
+练习:创建一个具有*@SuperFast, @StandardFrameRelaySwitchingFlubber* 和 *@Alternative*的传输器。然后使用beans.xml激活*SuperFast, StandardFrameRelaySwitchingFlubber, Alternative*支持。通过*CDI Group*邮件列表发给我你的解决方案。第一发送的将会张贴在*CDI*墙壁上。
+
+阅读者练习：更改注入点限定，只使用*StandardAtmTransport*。通过*CDI Group*邮件列表发给我你的解决方案。第一发送的将会张贴在*CDI*：墙壁上。
+
+*待续..*
