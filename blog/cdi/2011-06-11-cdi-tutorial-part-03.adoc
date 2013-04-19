@@ -1,0 +1,201 @@
+---
+layout: blog-post
+title: (译)JavaEE6规范 CDI教程第三部分
+author: kuuyee
+tags: [JEE, CDI]
+---
+
+原文链接: http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial[http://code.google.com/p/jee6-cdi/wiki/DependencyInjectionAnIntroductoryTutorial]
+
+本部分讲述*@Alternative*和*@Qualfiers*
+
+=== 使用@Alternative来选择一个替代者
+
+你可能还记得，我们在前面定义了几个可作为替代选择的传输器，分别是*JsonRestAtmTransport*和*SoapRestAtmTransport*。想象一下如果你是ATM的安装者，那么需要配置传输器和地点。我们之前定义的注入点只是使用默认传输器*StandardRestAtmTransport*。
+
+如果还需要不同的传输器，就需要更改/META-INF/beans.xml文件来正确的选择传输器，如下：
+[source,xml]
+----
+<!-- {classpath}/META-INF/beans.xml -->
+<beans xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/beans_1_0.xsd">
+        <alternatives>
+                <class>org.cdi.advocacy.JsonRestAtmTransport</class>
+        </alternatives>
+</beans>
+----
+
+你在输出中将会看到选择使用了JSON REST传输器。
+Output
+[source,java]
+----
+deposit called
+        communicating with bank via JSON REST transport
+----
+
+替代选择在DI中是非常普遍的场景应用，也就是说，你有不同的注入对象依赖于不同的构建环境。很棒的是对象可以被替换。替代选择特性允许你标记对象可以被其它对象替换。
+
+如果DI容器有选择替代功能，可以让你标记对象能够被替代。请考虑使用这种方式。因为我们不需要非得在文档中说明替代选择，他自身就是一种文档，如果某些人知道CDI并且知道替代选择，那么他们在看到它时不会感到陌生。替代选择是让你替代对象的标准方式。
+
+你可以考虑使用CDI作为很多模式的标准，我们已经在很多纯DI框架中使用过。简单化和标准化是DI的发展方向的一部分。
+2. 使用@Qualifier注入不同的类型
+在CDI中所有的对象和生产者都是限定类型的。如果你没有分配限定类型那么将会使用默认的@Default和@Any。就像一个罪犯在美国，如果没有足够的钱给律师，那么他将会被分配一个。
+限定类型用来识别正确的对象被注入，你可以写自己定制的限定类型。
+限定类型能够匹配注入目标和注入源，确保正确的类型被注入。
+你可以决定在什么时候注入Soap、Json和Standard传输器。你不想把他们列出来选择，实际上，你想在某些时候使用Json实现.
+
+下面是对于Soap的一个限定类型定义。
+[source,java]
+----
+、、 Soap运行时限定类型注解
+package org.cdi.advocacy;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+
+import javax.inject.Qualifier;
+
+
+@Qualifier @Retention(RUNTIME) @Target({TYPE, METHOD, FIELD, PARAMETER})
+public @interface Soap {
+
+}
+----
+
+注意一个限定类型就是一个运行时注解，其标注了*@Qualifier*注解。*@Qualifier*注解把一个运行时注解声明为限定类型。
+
+下面我在*SoapAtmTransport*使用一个新的限定类型*@Soap*:
+[source,java]
+----
+// SoapAtmTransport使用新的@Soap限定类型注解
+package org.cdi.advocacy;
+
+@Soap
+public class SoapAtmTransport implements ATMTransport {
+
+        @Override 
+        public void communicateWithBank(byte[] datapacket) {
+                System.out.println("communicating with bank via Soap transport");
+        }
+
+}
+
+现在你已经准备好注入一个Soap传输器，你可以在构造器参数上标注限定类型注解，如下：
+[source,java]
+----
+// AutomatedTellerMachineImpl使用新的@Soap限定类型注解通过构造器参数注入SoapAtmTransport
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        private ATMTransport transport;
+
+        @Inject 
+        public AutomatedTellerMachineImpl(@Soap ATMTransport transport) {
+                this.transport = transport;
+        }
+----
+
+你也可以使用setter方法参数来标注限定类型，如下：
+[source,java]
+----
+//AutomatedTellerMachineImpl使用新的@Soap限定类型注解通过setter方法参数注入SoapAtmTransport
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        private ATMTransport transport;
+
+        @Inject 
+        public void setTransport(@Soap ATMTransport transport) {
+                this.transport = transport;
+        }
+----
+
+最通用的方法就是使用变量域层注入，如下：
+[source,java]
+----
+// AutomatedTellerMachineImpl使用新的@Soap限定类型注解通过变量域注入SoapAtmTransport
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        @Inject @Soap
+        private ATMTransport transport;
+---
+
+到这里，我们下面将使用变量域层注入来简化我们的例子。
+
+=== 使用@Qualfiers在同一个bean中注入多个类型
+我们假设ATM机使用不同的传输器是基于一些不同的商业规则，比如是LDAP或者XML或者数据库。
+
+你需要声明在运行时使用哪个传输器。
+
+在这个例子中我们希望注入三个不同的传输器并且基于商业规则配置传输器。
+
+你需要通知在注入完成时bean已经被*CDI*准备好了。要获得这个通知你需要在init方法上标注*@PostConstruct*注解，这样你就能区分使用哪种类型的传输器了。
+[source,java]
+----
+//AutomatedTellerMachineImpl使用新的多个限定类型注解注入多个传输器
+package org.cdi.advocacy;
+
+import java.math.BigDecimal;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+@Named("atm")
+public class AutomatedTellerMachineImpl implements AutomatedTellerMachine {
+        
+        private ATMTransport transport;
+        
+        @Inject @Soap
+        private ATMTransport soapTransport;
+        
+        @Inject @Json
+        private ATMTransport jsonTransport;
+        
+        @Inject @Json
+        private ATMTransport standardTransport;
+
+        
+        //These could be looked up in a DB, JNDI or a properties file.
+        private boolean useJSON = true;
+        private boolean behindFireWall = true;
+
+        @PostConstruct
+        protected void init() {
+                //Look up values for useJSON and behindFireWall         
+
+                if (!behindFireWall) {
+                        transport = standardTransport;
+                } else {
+                        if (useJSON) {
+                                transport = jsonTransport;
+                        } else {
+                                transport = soapTransport;
+                        }
+                }
+                                
+        }
+        
+
+        public void deposit(BigDecimal bd) {
+                System.out.println("deposit called");
+                
+                
+                transport.communicateWithBank(null);
+        }
+
+       ...
+}
+----
+
+尝试执行上面的例子，将会得到下面的输出。
+Output
+[source,java]
+----
+deposit called
+communicating with bank via JSON REST transport
+----
+
+*待续..*

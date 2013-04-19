@@ -1,0 +1,48 @@
+---
+layout: blog-post 
+title: Shell环境下删除命令如何排除指定文件 
+author: kuuyee
+tags: [Linux, Shell, Command, 系统管理]
+---
+
+下面列出root目录下的文件结构
+
+============================
+ +- root
+     +- fileA.txt
+     +- subdir1		
+	  +-  a.txt
+	  +-  b.txt
+	  +-  c.txt
+     +- subdir2
+	  +- d.txt
+	  +- e.txt
+	  +- f.txt
+     +- subdir3	
+     +- subdir4	
+     +- subdir5	
+     +- subdir6	
+     +- subdir7	
+     +- subdir8	
+     +- subdir9	
+     ...
+============================
+
+目的是除了目录subdir2和文件fileA.txt其它的都要删除，如果一个一个删就效率太低了，Shell命令可以轻松的解决
+
+
+[source,bash]
+ls|grep -v 'subdir2\|fileA.txt'|xargs rm -r     
+
+
+执行的效果如下
+
+============================
+ +- root
+     +- fileA.txt
+     +- subdir2
+          +- d.txt
+          +- e.txt
+          +- f.txt
+============================
+

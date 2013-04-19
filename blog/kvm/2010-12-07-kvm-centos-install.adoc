@@ -1,0 +1,159 @@
+---
+layout: blog-post
+title: CentOS下KVM试用
+author: kuuyee
+tags: [KVM, Git, 虚拟化, Linux, CentOS]
+description: CentOS下KVM试用
+---
+
+
+最近整理公司的几台服务器，由于机器少应用多，就总是觉得服务器资源紧张，所以痛下决心使用虚拟机。考察了一番决定使用KVM，因为机器配置不是很高，使用KVM性能会比较好。
+
+基础系统选用CentOS5.4，下面列出具体的安装配置过程
+
+==== 安装CentOS操作系统
+下载CentOS5.4，安装是使用Server模式，不安装任何桌面，毕竟图形桌面太占资源，在选择软件时启用下面的几项：
+
+- 开发工具
+- 开发库
+- 虚拟化--KVM
+
+[quote]
+*虚拟化--KVM*
+起初我没有启用KVM，因为我想自己编译安装KVM，结果在装载内核kvm-amd模块时总是不成功！
+
+安装完成后首先启用内核的kvm-amd模块，如果你的机器是intel的就改成kvm-intel，命令如下
+
+[source]
+[root@localhost ~]# modprobe kvm-amd
+
+如果没有提示任何错误就成功了，可以使用lsmod | grep kvm查看是否装载成功，命令如下
+
+[sourc3e]
+[root@localhost ~]# lsmod | grep kvm
+kvm_amd                68648  1 
+kvm                   223264  2 ksm,kvm_amd
+
+看到如上类似的输出就表示启用kvm模块成功！
+
+==== 编译安装KVM
+CentOS的yum源里提供的kvm版本太低，所以我决定自己编译安装。首先下载kvm源码包，然后解压，命令如下
+[source]
+[root@localhost ~]# tar zxvf qemu-kvm-0.12.3.tar.gz
+
+接下来开始编译、安装，进入解压后的目录，命令如下：
+[source]
+[root@localhost /]# ./configure --prefix=/usr
+[root@localhost /]# make
+[root@localhost /]# make install
+
+编译很快，基本上几秒就完成了，如果没有出现什么错误，那么恭喜你！KVM已经成功安装了！
+
+[quote]
+*KVM版本*
+目前官方的最高版本是0.13.0，可是我使用发现无法通过vns连接虚拟机，所以只好放弃，使用0.12.3版本就一切正常。
+
+==== 搞定虚拟机网桥
+虚拟机最重要的是保证网络能正常访问，否则就没有意义了。启用kvm网桥要安装两个软件bridge-utils和tunctl。
+bridge-utils可以使用yum安装，命令如下：
+[source]
+yum install bridge-utils
+
+tunctl在源里没有找到，需要下载rpm包手工安装，命令如下：
+[source]
+[root@localhost /]# wget -c 'ftp://194.199.20.114/linux/EPEL/5Server/x86_64/tunctl-1.5-2.el5.x86_64.rpm'
+[root@localhost /]# rpm -ivh tunctl-1.5-2.el5.x86_64.rpm
+
+接下来编辑网桥配置文件，新建一个名字为vmbridge.sh的shell文件，使用vim编辑，命令如下
+[source]
+[root@localhost /]# vim vmbridge.sh
+
+然后在新建的文件中加入如下内容
+[source]
+#!/bin/bash
+modprobe tun   #加载tun模块                         
+tunctl -t tap0 -u root  #先是新建一个名为tap0的虚拟网卡，所有者为当前用户                 
+tunctl -t tap1 -u root
+tunctl -t tap2 -u root
+tunctl -t tap3 -u root
+tunctl -t tap4 -u root
+tunctl -t tap5 -u root
+tunctl -t tap6 -u root
+brctl addbr br0   #新建一个名为br0的网桥                      
+ifconfig eth0 0.0.0.0 promisc #eth0进入promiscuous模式，不过执行此步之前最好记录原来eth0的IP，避免后面出现IP冲突          
+brctl addif br0 eth0    #将eth0加入br0.                
+ifconfig br0 up         #活br0 
+dhclient br0            #获取br0的IP          
+brctl addif br0 tap0    #将tap0加入br0    
+brctl addif br0 tap1
+brctl addif br0 tap2
+brctl addif br0 tap3
+brctl addif br0 tap4
+brctl addif br0 tap5
+brctl addif br0 tap6
+ifconfig tap0 up       #激活tap0  
+ifconfig tap1 up
+ifconfig tap2 up
+ifconfig tap3 up
+ifconfig tap4 up
+ifconfig tap5 up
+ifconfig tap6 up
+chmod a+rw /dev/net/tun
+
+以上的9个步骤就设置了一个虚拟网卡tap0，上面的例子中我一共创建了7个虚拟网卡，如果想设置更多的网卡参考上次的内容自行添加即可。
+
+接下来给vmbridge.sh赋予可执行权限，命令如下：
+[source]
+[root@localhost /]# chmod a+x vmbridge.sh
+
+然后把它加入系统启动里，这样每次启动系统就自动创建了7个虚拟网卡。命令如下：
+[source]
+[root@localhost /]# echo '/kvm/vmbridge.sh' >> /etc/rc.local
+
+OK! 虚拟网卡已经配置完毕，你可以手动执行下vmbridge.sh，或者马上重启下系统，然后使用ifconfig命令查看一下是否出现了新建的虚拟网卡。
+
+==== 安装VNC服务器
+这步简单，两条命令搞定，命令如下：
+[source]
+[root@localhost /]# yum install vnc-server
+[root@localhost /]# service vncserver start
+
+现在可以查看一下VNC是否已经运行，执行下面的命令查看
+[source]
+[root@localhost /]# service vncserver status
+Xvnc 已停
+
+虽然显示Xvnc 已停，但其实是运行的，可以正差访问
+
+==== 创建KVM虚拟机
+所有的前期配置都OK了，下面可以创建KVM虚拟机了。
+首先创建一个大小为40G的镜像文件用来安装WinXP虚拟机。命令如下
+[source]
+[root@localhost /]# qemu-img create -f qcow2 /kvm/vmimg/kvm-xp.img 40G
+
+现在开始安装WinXP虚拟机，使用如下命令：
+[source]
+[root@localhost /]# qemu-system-x86_64 -m 1024 -drive file=/kvm/vmimg/kvm-xp.img,cache=writeback -localtime -net nic,vlan=0,macaddr=52-54-00-12-34-01 -net tap,vlan=0,ifname=tap0,script=no -boot d -cdrom /home/lm/iso/winxp.iso -smp 2 -soundhw es1370 -vnc 192.168.1.1:1 &
+
+解释一下参数都是什么意思
+[source]
+root@localhost /]# qemu-system-x86_64 -m 1024 -drive file=/kvm/vmimg/kvm-xp.img,cache=writeback -localtime -net nic,vlan=0,macaddr=52-54-00-12-34-01 -net tap,vlan=0,ifname=tap0,script=no -boot d -cdrom /home/lm/iso/winxp.iso -smp 2 -soundhw es1370 -vnc 192.168.1.1:1
+
+- -m 1024 表示安装虚拟机时使用1024MB内存
+- file=/kvm/vmimg/kvm-xp.img 指向刚刚创建的虚拟机镜像文件
+- ifname=tap0 指定一个虚拟网卡
+- -cdrom /home/lm/iso/winxp.iso 指定WinXP的iso安装文件
+- -smp 2 指定使用CPU的核数
+- -soundhw es1370 启用声卡
+- -vnc 192.168.1.1:1 指定VNC访问IP和端口
+
+然后用VNC客户端连接192.168.1.1:1，就看到安装界面了。安装就不说，和以往安装XP一样的。
+接下来可以访问安装好的虚拟机了。使用如下命令：
+[source]
+[root@localhost /]# qemu-system-x86_64 -m 1024 -drive file=/kvm/vmimg/kvm-xp.img -localtime -net nic,vlan=0,macaddr=00:00:00:00:20:02 -net tap,vlan=0,ifname=tap0,script=no -boot c -smp 2 -clock rtc -soundhw es1370 -vnc 192.168.1.1:1 &
+
+命令格式基本和安装差不多，需要说明的是macaddr硬件地址要自己指定一个不冲突的，虚拟机可以用DHCP自动获取一个IP地址。最后用VNC客户端连接 *192.168.1.1:1* 就可看到XP启动界面了。如果你安装的是Linux虚拟机，可以直接用SSH访问，比较方便。
+
+至此整个安装配置过程完毕，最后祝各位都能成功安装KVM虚拟机！
+
+*GoodLuck！*

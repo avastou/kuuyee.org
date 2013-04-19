@@ -1,0 +1,467 @@
+---
+layout: blog-post 
+title: 在Fedora上安装GitLab5.0
+author: kuuyee 
+tags: [GitLab, Rails, Ruby, Fedora, Linux]
+---
+
+GitLab5发布快一个月了，决定试用下，5.0最大的特性就是用GitLab-Shell取代了Gitolite，这大大降低了安装难度，不多本人在安装过程中还是越到了一些问题，所以记录下来供要安装GitLab5的朋友参考！
+
+主要参考文档: ["https://github.com/gitlabhq/gitlabhq/blob/5-0-stable/doc/install/installation.md":https://github.com/gitlabhq/gitlabhq/blob/5-0-stable/doc/install/installation.md]
+
+h4. 安装步骤总览
+
+## 安装依赖包
+## 安装Ruby/RVM
+## 创建Git用户
+## 安装GitLab-Shell
+## 配置数据库
+## 安装GitLab
+## 启动
+
+h4. 安装依赖库
+
+bc(command). yum install libicu-devel mysql-devel pcre-devel
+ 
+安装python,官方要求版本必须在2.5以上，而且不支持3.0,Fedora一般的版本都在2.7以上，因此直接安装源自带的即可
+
+bc(command). yum install python
+
+安装完查看下版本
+
+bc(command). python --version
+
+还要确保python2命令有效
+
+bc(command). python2 --version
+
+如果提示 @bash: python2: 未找到命令@ ,那你需要link一下
+
+bc(command). sudo ln -s /usr/bin/python /usr/bin/python2
+
+h4. 安装Ruby
+
+** 源码方式安装
+
+bc(command). mkdir /tmp/ruby && cd /tmp/ruby
+curl --progress http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p392.tar.gz | tar xz
+cd ruby-1.9.3-p392
+./configure
+make
+sudo make install
+
+** RVM方式
+
+bc(command). curl -#L https://get.rvm.io | bash -s stable --ruby
+
+默然安装ruby2.0, GitLab推荐用1.9.3
+
+bc(command). rvm install ruby-1.9.3-p392
+
+还要安装Bundler
+
+bc(command). sudo gem install bundler
+
+h4. 添加系统Git用户
+
+创建一个 @git@ 用户供GitLab使用
+
+bc(command). adduser --comment 'GitLab' git
+
+让git用户无密码登陆
+
+bc(command). sudo chmod 644 /etc/shadow
+vim /etc/shadow
+
+去掉用户的叹号
+
+bc(command). git:!!:15814:0:99999:7:::
+修改为
+git::15814:0:99999:7:::
+
+加入sudo组
+
+bc(command). chmod u+w /etc/sudoers
+vim /etc/sudoers 
+## Allow root to run any commands anywhere 
+root    ALL=(ALL)       ALL
+git     ALL=(ALL)       ALL #加入这行
+
+
+h4. 安装GitLab Shell
+
+切换到git用户
+
+bc(command). su - git
+cd ~/
+
+克隆GitLab Shell
+
+bc(command). git clone https://github.com/gitlabhq/gitlab-shell.git
+cd gitlab-shell
+
+切换到最新的分支
+
+bc(command).. git checkout v1.2.0
+Note: checking out 'v1.2.0'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by performing another checkout.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -b with the checkout command again. Example:
+
+  git checkout -b new_branch_name
+
+HEAD 目前位于 3018504... return non-zero status if gitlab-projects or gitlab-keys cmd was not successful
+
+
+h4. 
+
+生产配置文件
+
+bc(command). cp config.yml.example config.yml
+
+更改配置信息，一般就改下你部署的域名地址gitlab_url
+
+bc(command). vim config.yml
+# Url to gitlab instance. Used for api calls. Should be ends with slash.
+gitlab_url: "http://localhost/" #改成你的域名或者IP
+
+安装
+
+bc(command). ./bin/install
+
+h4. 安装数据库
+
+gitlab支持mysql和postgresql，这里以mysql为例，postgresql会比较麻烦！
+
+切换回root用户
+
+bc(command). su - root
+
+安装mysql及开发包
+
+bc(command). yum install -y mysql-server mysql mysql-devel
+
+启动数据库
+
+bc(command). service mysqld start
+
+初始化GitLab数据库
+
+bc(command).. mysql -u root -p    
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 2
+Server version: 5.5.30 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> CREATE USER 'gitlab'@'localhost' IDENTIFIED BY 'gitlab';   
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> GRANT SELECT, LOCK TABLES, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'gitlab'@'localhost';Query OK, 0 rows affected (0.00 sec)
+
+mysql> \q
+Bye
+
+
+h4. 
+
+测试gitlab用户连接mysql
+
+bc(command). sudo -u git -H mysql -u gitlab -p -D gitlabhq_production
+
+
+h4. 安装GitLab
+
+终于到GitLab的安装了，进入git用户
+
+bc(command). su - git
+cd ~/
+
+克隆GitLab
+
+bc(command). sudo -u git -H git clone https://github.com/gitlabhq/gitlabhq.git gitlab
+cd gitlab
+
+
+切换到5.0稳定分支
+
+bc(command). sudo -u git -H git checkout 5-0-stable
+
+
+
+h4. 配置
+
+bc(command).. cd /home/git/gitlab
+
+# 用样例配置生成gitlab配置
+sudo -u git -H cp config/gitlab.yml.example config/gitlab.yml
+
+# 更改域名 
+sudo -u git -H vim config/gitlab.yml
+
+# 确保gitlab对 log/ 和 tmp/ 目录有写权限
+sudo chown -R git log/
+sudo chown -R git tmp/
+sudo chmod -R u+rwX  log/
+sudo chmod -R u+rwX  tmp/
+
+# 创建附属目录
+sudo -u git -H mkdir /home/git/gitlab-satellites
+
+# 创建pids目录并确保对gitlab可写
+sudo -u git -H mkdir tmp/pids/
+sudo chmod -R u+rwX  tmp/pids/
+
+# 生成Unicorn配置
+sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
+
+
+h4. 配置GitLab DB设置
+
+bc(command). # Mysql
+sudo -u git cp config/database.yml.mysql config/database.yml
+
+h4. 安装Gems
+
+bc(command).. cd /home/git/gitlab
+
+sudo gem install charlock_holmes --version '0.6.9'
+
+# For MySQL (note, the option says "without")
+bundle install --deployment --without development test postgres
+
+
+h4. 
+
+gitlab依赖的gems很多，欣赏下安装的列表:
+
+bc(command). Fetching source index from https://rubygems.org/
+Installing rake (10.0.3) 
+Installing i18n (0.6.1) 
+Installing multi_json (1.7.1) 
+Installing activesupport (3.2.13) 
+Installing builder (3.0.4) 
+Installing activemodel (3.2.13) 
+Installing erubis (2.7.0) 
+Installing journey (1.0.4) 
+Installing rack (1.4.5) 
+Installing rack-cache (1.2) 
+Installing rack-test (0.6.2) 
+Installing hike (1.2.1) 
+Installing tilt (1.3.6) 
+Installing sprockets (2.2.2) 
+Installing actionpack (3.2.13) 
+Installing mime-types (1.21) 
+Installing polyglot (0.3.3) 
+Installing treetop (1.4.12) 
+Installing mail (2.5.3) 
+Installing actionmailer (3.2.13) 
+Installing arel (3.0.2) 
+Installing tzinfo (0.3.37) 
+Installing activerecord (3.2.13) 
+Installing activeresource (3.2.13) 
+Using bundler (1.3.5) 
+Installing rack-ssl (1.3.3) 
+Installing json (1.7.7) 
+Installing rdoc (3.12.2) 
+Installing thor (0.17.0) 
+Installing railties (3.2.13) 
+Installing rails (3.2.13) 
+Installing acts-as-taggable-on (2.3.3) 
+Installing backports (2.6.7) 
+Installing bcrypt-ruby (3.0.1) 
+Installing sass (3.2.5) 
+Installing bootstrap-sass (2.2.1.1) 
+Installing carrierwave (0.8.0) 
+Installing facter (1.6.17) 
+Installing timers (1.1.0) 
+Installing celluloid (0.12.4) 
+Installing charlock_holmes (0.6.9) 
+Installing chosen-rails (0.9.8) 
+Installing coffee-script-source (1.4.0) 
+Installing execjs (1.4.0) 
+Installing coffee-script (2.2.0) 
+Installing coffee-rails (3.2.2) 
+Installing colored (1.2) 
+Installing connection_pool (1.0.0) 
+Installing descendants_tracker (0.0.1) 
+Installing orm_adapter (0.4.0) 
+Installing warden (1.2.1) 
+Installing devise (2.2.3) 
+Installing diff-lcs (1.1.3) 
+Installing request_store (1.0.5) 
+Installing draper (1.1.0) 
+Installing enumerize (0.5.1) 
+Installing escape_utils (0.2.4) 
+Installing multipart-post (1.1.5) 
+Installing faraday (0.8.6) 
+Installing ffaker (1.15.0) 
+Installing sass-rails (3.2.5) 
+Installing font-awesome-sass-rails (3.0.0.1) 
+Installing foreman (0.61.0) 
+Installing gemoji (1.2.1) 
+Installing git (1.2.5) 
+Installing posix-spawn (0.3.6) 
+Installing yajl-ruby (1.1.0) 
+Installing pygments.rb (0.4.2) 
+Installing github-linguist (2.3.4) 
+Installing github-markdown (0.5.3) 
+Installing github-markup (0.7.5) 
+Installing gitlab-grack (1.0.0) 
+Installing gitlab-pygments.rb (0.3.2) 
+Installing gitlab_meta (5.0) 
+Installing net-ldap (0.2.2) 
+Installing hashie (1.2.0) 
+Installing omniauth (1.1.3) 
+Installing pyu-ruby-sasl (0.0.3.3) 
+Installing rubyntlm (0.1.1) 
+Installing gitlab_omniauth-ldap (1.0.2) 
+Installing gitlab_yaml_db (1.0.0) 
+Using grit (2.5.0) from https://github.com/gitlabhq/grit.git (at c40a324) 
+Installing mustache (0.99.4) 
+Installing nokogiri (1.5.6) 
+Installing sanitize (2.0.3) 
+Installing rack-protection (1.4.0) 
+Installing sinatra (1.3.5) 
+Installing stringex (1.5.1) 
+Installing useragent (0.4.16) 
+Using gollum (2.4.11) from git://github.com/gollum/gollum.git (at 5dcd3c8) 
+Installing gon (4.0.2) 
+Installing multi_xml (0.5.3) 
+Installing rack-accept (0.4.5) 
+Installing rack-mount (0.8.3) 
+Installing virtus (0.5.4) 
+Installing grape (0.3.2) 
+Installing grape-entity (0.2.0) 
+Installing grit_ext (0.6.2) 
+Installing haml (4.0.0) 
+Installing haml-rails (0.4) 
+Installing httparty (0.10.2) 
+Installing httpauth (0.2.0) 
+Installing jquery-atwho-rails (0.1.7) 
+Installing jquery-rails (2.1.3) 
+Installing jquery-ui-rails (2.0.2) 
+Installing jwt (0.1.5) 
+Installing kaminari (0.14.1) 
+Installing kgio (2.8.0) 
+Installing libv8 (3.3.10.4) 
+Installing modernizr (2.6.2) 
+Installing mysql2 (0.3.11) 
+Installing oauth (0.4.7) 
+Installing oauth2 (0.8.1) 
+Installing omniauth-oauth2 (1.1.1) 
+Installing omniauth-github (1.1.0) 
+Installing omniauth-google-oauth2 (0.1.13) 
+Installing omniauth-oauth (1.0.1) 
+Installing omniauth-twitter (0.0.14) 
+Installing raindrops (0.10.0) 
+Using raphael-rails (2.1.0) from https://github.com/gitlabhq/raphael-rails.git (at master) 
+Installing redcarpet (2.2.2) 
+Installing redis (3.0.2) 
+Installing redis-store (1.1.3) 
+Installing redis-rack (1.4.2) 
+Installing redis-actionpack (3.2.3) 
+Installing redis-activesupport (3.2.3) 
+Installing redis-namespace (1.2.1) 
+Installing redis-rails (3.2.3) 
+Installing seed-fu (2.2.0) 
+Installing select2-rails (3.3.1) 
+Installing settingslogic (2.0.9) 
+Installing sidekiq (2.7.5) 
+Installing six (0.2.0) 
+Installing temple (0.5.5) 
+Installing slim (1.3.6) 
+Installing stamp (0.5.0) 
+Installing state_machine (1.1.2) 
+Installing therubyracer (0.10.2) 
+Installing uglifier (1.3.0) 
+Installing unicorn (4.6.2) 
+Your bundle is complete!
+
+
+h4. 初始化数据并激活高级特性
+
+首先编辑/home/git/gitlab/config/database.yml
+
+bc(command). #
+# PRODUCTION
+#
+production:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  database: gitlabhq_production
+  pool: 5
+  username: root
+  password: "secure password" #更改为你mysql的root用户密码
+  # host: localhost
+  # socket: /tmp/mysql.sock
+#
+
+执行rake
+
+bc(command). bundle exec rake gitlab:setup RAILS_ENV=production
+
+div(alert alert-danger). 报错了，提示 Error connecting to Redis on localhost:6379 (ECONNREFUSED)
+解决办法：
+切到root,安装Redis
+bc(command). yum install redis*
+service redis start #启动redis
+
+
+重新执行rake
+
+bc(command). bundle exec rake gitlab:setup RAILS_ENV=production
+
+div(alert alert-info). 如果你安装最新版可能会报 @/home/git/repositories/root@ 目录找不到，手工建上即可！
+
+如果你看到如下信息:
+
+bc(command).. ...
+Administrator account created:
+
+login.........admin@local.host
+password......5iveL!fe
+
+
+h4. 
+
+*恭喜你！你已经成功安装GitLab了！别忘了记录输出的管理用户名和密码！*
+
+h4. 启动GitLab
+
+bc(command). bundle exec rails s -e production
+=> Booting WEBrick
+=> Rails 3.2.13 application starting in production on http://0.0.0.0:3000
+=> Call with -d to detach
+=> Ctrl-C to shutdown server
+[2013-04-19 15:04:41] INFO  WEBrick 1.3.1
+[2013-04-19 15:04:41] INFO  ruby 1.9.3 (2013-02-22) [x86_64-linux]
+[2013-04-19 15:04:41] INFO  WEBrick::HTTPServer#start: pid=11488 port=3000
+
+Ok,你现在可以访问GitLab了，默认端口是 @3000@， 访问 http://你的域名或IP:3000
+第一访问会比较慢，因为要编译很多js和css.
+
+哈哈！看到登陆页面了吧！
+
+!/images/gitlab/gitlab_01.png(GitLab登陆)!
+
+输入管理用户名和密码！开始享受GitLab吧！
+
+!/images/gitlab/gitlab_02.png(GitLab首页)!
+
+
